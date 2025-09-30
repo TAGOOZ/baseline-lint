@@ -8,6 +8,11 @@ on:
   release:
     types: [ published ]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 env:
   NODE_VERSION: '18'
   NPM_CACHE_DIR: ~/.npm
@@ -260,6 +265,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+      issues: write
     
     steps:
       - name: Checkout code
