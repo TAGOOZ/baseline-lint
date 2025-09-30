@@ -308,7 +308,9 @@ jobs:
           echo "Changed CSS/JS files: $CHANGED_FILES"
           
           # Run baseline check on changed files only
-          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score --fail-on-error 2>/dev/null || echo "{}")
+          echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
+          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint failed\"}")
+          echo "Baseline-lint result: $RESULT"
           
           SCORE=$(echo "$RESULT" | jq -r '.score // 100')
           ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
