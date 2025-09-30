@@ -1,12 +1,12 @@
 {
-    "name": "baseline-lint",
-    "version": "1.0.0",
-    "description": "Check web features for Baseline compatibility",
-    "main": "src/index.js",
-    "type": "module",
-    "bin": {
-      "baseline-lint": "./bin/cli.js"
-    },
+  "name": "baseline-lint",
+  "version": "1.0.0",
+  "description": "Check web features for Baseline compatibility",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "baseline-lint": "./bin/cli.js"
+  },
   "scripts": {
     "test": "node --test",
     "test:unit": "node --test test/**/*.test.js",
@@ -26,55 +26,55 @@
     "clean": "rm -rf dist .tsbuildinfo",
     "prepublishOnly": "npm run clean && npm run build && npm run test:all"
   },
-    "keywords": [
-      "baseline",
-      "web-features",
-      "compatibility",
-      "linter",
-      "css",
-      "javascript",
-      "browser-support"
-    ],
-    "author": "Mustafa Tag Eldeen <mostafatageldeen588@gmail.com>",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/TAGOOZ/baseline-lint.git"
-    },
-    "bugs": {
-        "url": "https://github.com/TAGOOZ/baseline-lint/issues"
-    },
-    "homepage": "https://github.com/TAGOOZ/baseline-lint#readme",
-    "dependencies": {
-      "web-features": "^3.2.0",
-      "compute-baseline": "^0.4.0",
-      "css-tree": "^3.0.0",
-      "@babel/parser": "^7.24.0",
-      "@babel/traverse": "^7.24.0",
-      "commander": "^12.0.0",
-      "chalk": "^5.3.0",
-      "ora": "^8.0.0",
-      "glob": "^11.0.0"
-    },
-    "devDependencies": {
-      "typescript": "^5.3.0",
-      "@types/node": "^20.10.0",
-      "@types/jest": "^29.5.0",
-      "ts-node": "^10.9.0"
-    },
-    "types": "./index.d.ts",
-    "files": [
-      "src/",
-      "bin/",
-      "scripts/",
-      "dashboard/",
-      "index.d.ts",
-      "types/",
-      "README.md",
-      "LICENSE"
-    ],
-    "engines": {
-      "node": ">=16.0.0",
-      "npm": ">=8.0.0"
-    }
+  "keywords": [
+    "baseline",
+    "web-features",
+    "compatibility",
+    "linter",
+    "css",
+    "javascript",
+    "browser-support"
+  ],
+  "author": "Mustafa Tag Eldeen <mostafatageldeen588@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TAGOOZ/baseline-lint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TAGOOZ/baseline-lint/issues"
+  },
+  "homepage": "https://github.com/TAGOOZ/baseline-lint#readme",
+  "dependencies": {
+    "web-features": "^3.2.0",
+    "compute-baseline": "^0.4.0",
+    "css-tree": "^3.0.0",
+    "@babel/parser": "^7.24.0",
+    "@babel/traverse": "^7.24.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0",
+    "@types/jest": "^29.5.0",
+    "ts-node": "^10.9.0"
+  },
+  "types": "./index.d.ts",
+  "files": [
+    "src/",
+    "bin/",
+    "scripts/",
+    "dashboard/",
+    "index.d.ts",
+    "types/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
+}
