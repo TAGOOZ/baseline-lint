@@ -290,17 +290,22 @@ jobs:
         run: |
           echo "Running quick baseline check for PR..."
           
-          # Get changed files in PR
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+          # Debug: Show all changed files
+          echo "All changed files:"
+          git diff --name-only HEAD~1 HEAD
+          
+          # Get changed files in PR (including new files)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
           
           if [ -z "$CHANGED_FILES" ]; then
+            echo "No CSS/JS files found in changes"
             echo "result=no-changes" >> $GITHUB_OUTPUT
             echo "score=100" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          echo "Changed files: $CHANGED_FILES"
+          echo "Changed CSS/JS files: $CHANGED_FILES"
           
           # Run baseline check on changed files only
           RESULT=$(baseline-lint check $CHANGED_FILES --format json --score --fail-on-error 2>/dev/null || echo "{}")
