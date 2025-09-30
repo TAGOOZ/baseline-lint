@@ -291,7 +291,7 @@ jobs:
           echo "Running quick baseline check for PR..."
           
           # Get changed files in PR
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
           
           if [ -z "$CHANGED_FILES" ]; then
             echo "result=no-changes" >> $GITHUB_OUTPUT
