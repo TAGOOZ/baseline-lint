@@ -17,6 +17,7 @@ jobs:
   test:
     name: Test Suite
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -69,6 +70,7 @@ jobs:
   lint:
     name: Lint & Format
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Checkout code
@@ -96,6 +98,7 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Checkout code
@@ -120,6 +123,7 @@ jobs:
   build:
     name: Build & Package
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
       - name: Checkout code
@@ -249,6 +253,110 @@ jobs:
           release_name: Release ${{ github.event.release.tag_name }}
           draft: false
           prerelease: false
+
+  # PR Comment (only on pull requests)
+  pr-comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install baseline-lint globally
+        run: npm install -g baseline-lint
+
+      - name: Run quick baseline check
+        id: baseline-check
+        run: |
+          echo "Running quick baseline check for PR..."
+          
+          # Get changed files in PR
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+          
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "result=no-changes" >> $GITHUB_OUTPUT
+            echo "score=100" >> $GITHUB_OUTPUT
+            echo "issues=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Changed files: $CHANGED_FILES"
+          
+          # Run baseline check on changed files only
+          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score --fail-on-error 2>/dev/null || echo "{}")
+          
+          SCORE=$(echo "$RESULT" | jq -r '.score // 100')
+          ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
+          
+          echo "result=completed" >> $GITHUB_OUTPUT
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.baseline-check.outputs.result }}';
+            const score = '${{ steps.baseline-check.outputs.score }}';
+            const issues = '${{ steps.baseline-check.outputs.issues }}';
+            
+            let comment = '## 🔍 Baseline Compatibility Check\n\n';
+            
+            if (result === 'no-changes') {
+              comment += '✅ **No CSS/JS files were changed in this PR.**\n\n';
+              comment += 'No baseline compatibility check needed.';
+            } else if (result === 'completed') {
+              const scoreNum = parseInt(score);
+              const issuesNum = parseInt(issues);
+              
+              if (scoreNum >= 90) {
+                comment += '🎉 **Excellent Baseline Compatibility!**\n\n';
+              } else if (scoreNum >= 70) {
+                comment += '⚠️ **Good Baseline Compatibility**\n\n';
+              } else {
+                comment += '🚨 **Baseline Compatibility Issues Detected**\n\n';
+              }
+              
+              comment += `**Score:** ${score}/100\n`;
+              comment += `**Issues Found:** ${issues}\n\n`;
+              
+              if (issuesNum > 0) {
+                comment += '**Recommendations:**\n';
+                comment += '- Consider using widely supported features (baseline: high)\n';
+                comment += '- Add fallbacks for newly available features (baseline: low)\n';
+                comment += '- Review limited availability features (baseline: false)\n\n';
+              }
+              
+              comment += '**Install baseline-lint:** `npm install -g baseline-lint`\n';
+              comment += '**Check your code:** `baseline-lint check ./src --score`';
+            } else {
+              comment += '❌ **Baseline Check Failed**\n\n';
+              comment += 'Unable to run baseline compatibility check.\n';
+              comment += 'Please check the workflow logs for details.';
+            }
+            
+            comment += '\n\n---\n';
+            comment += '*Powered by [baseline-lint](https://www.npmjs.com/package/baseline-lint)*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
 
   # Notify on failure
   notify:

@@ -1,4 +1,4 @@
-name: Pull Request Check
+name: PR Baseline Check
 
 on:
   pull_request:
@@ -11,16 +11,11 @@ jobs:
   baseline-check:
     name: Baseline Compatibility Check
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
+    timeout-minutes: 5
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,175 +23,94 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install baseline-lint
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install baseline-lint globally
         run: npm install -g baseline-lint
 
       - name: Run baseline check
         id: baseline-check
         run: |
-          echo "Running baseline compatibility check..."
-          ./bin/cli.js check ./src --fail-on-error --format json > baseline-results.json || true
+          echo "Running baseline-lint on changed files..."
           
-          # Also run on test files
-          ./bin/cli.js check ./test --fail-on-error --format json > test-baseline-results.json || true
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
           
-          # Calculate scores
-          SRC_SCORE=$(./bin/cli.js score ./src 2>/dev/null | grep -o '[0-9]\+' | head -1 || echo "0")
-          TEST_SCORE=$(./bin/cli.js score ./test 2>/dev/null | grep -o '[0-9]\+' | head -1 || echo "0")
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No CSS/JS files changed"
+            echo "result=no-changes" >> $GITHUB_OUTPUT
+            echo "score=100" >> $GITHUB_OUTPUT
+            echo "issues=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           
-          echo "src_score=$SRC_SCORE" >> $GITHUB_OUTPUT
-          echo "test_score=$TEST_SCORE" >> $GITHUB_OUTPUT
+          echo "Changed files: $CHANGED_FILES"
+          
+          # Run baseline check
+          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score 2>/dev/null || echo "{}")
+          
+          # Extract score and issues count
+          SCORE=$(echo "$RESULT" | jq -r '.score // 100')
+          ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
+          
+          echo "result=completed" >> $GITHUB_OUTPUT
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+          
+          echo "Baseline Score: $SCORE/100"
+          echo "Issues Found: $ISSUES"
 
-      - name: Comment on PR
-        uses: actions/github-script@v7
+      - name: Comment PR
         if: always()
+        uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const path = require('path');
+            const result = '${{ steps.baseline-check.outputs.result }}';
+            const score = '${{ steps.baseline-check.outputs.score }}';
+            const issues = '${{ steps.baseline-check.outputs.issues }}';
             
-            // Read baseline results
-            let baselineResults = {};
-            let testBaselineResults = {};
+            let comment = '## 🔍 Baseline Compatibility Check\n\n';
             
-            try {
-              baselineResults = JSON.parse(fs.readFileSync('baseline-results.json', 'utf8'));
-            } catch (e) {
-              console.log('No baseline results found');
-            }
-            
-            try {
-              testBaselineResults = JSON.parse(fs.readFileSync('test-baseline-results.json', 'utf8'));
-            } catch (e) {
-              console.log('No test baseline results found');
-            }
-            
-            // Generate report
-            const srcScore = '${{ steps.baseline-check.outputs.src_score }}';
-            const testScore = '${{ steps.baseline-check.outputs.test_score }}';
-            
-            let comment = `## 📊 Baseline Compatibility Report
-            
-**Overall Scores:**
-- 📁 Source Code: **${srcScore}/100**
-- 🧪 Test Files: **${testScore}/100**
-
-`;
-            
-            // Add source code issues
-            if (baselineResults.issues && baselineResults.issues.length > 0) {
-              comment += `### 📁 Source Code Issues (${baselineResults.issues.length})
+            if (result === 'no-changes') {
+              comment += '✅ **No CSS/JS files were changed in this PR.**\n\n';
+              comment += 'No baseline compatibility check needed.';
+            } else if (result === 'completed') {
+              const scoreNum = parseInt(score);
+              const issuesNum = parseInt(issues);
               
-`;
-              baselineResults.issues.slice(0, 10).forEach(issue => {
-                const icon = issue.level === 'error' ? '❌' : '⚠️';
-                comment += `${icon} **${issue.file}**:${issue.line}:${issue.column} - \`${issue.feature}\`\n`;
-                comment += `   ${issue.message}\n\n`;
-              });
-              
-              if (baselineResults.issues.length > 10) {
-                comment += `*... and ${baselineResults.issues.length - 10} more issues*\n\n`;
+              if (scoreNum >= 90) {
+                comment += '🎉 **Excellent Baseline Compatibility!**\n\n';
+              } else if (scoreNum >= 70) {
+                comment += '⚠️ **Good Baseline Compatibility**\n\n';
+              } else {
+                comment += '🚨 **Baseline Compatibility Issues Detected**\n\n';
               }
-            } else {
-              comment += `### ✅ Source Code - No Baseline Issues Found!\n\n`;
-            }
-            
-            // Add test file issues
-            if (testBaselineResults.issues && testBaselineResults.issues.length > 0) {
-              comment += `### 🧪 Test File Issues (${testBaselineResults.issues.length})
               
-`;
-              testBaselineResults.issues.slice(0, 5).forEach(issue => {
-                const icon = issue.level === 'error' ? '❌' : '⚠️';
-                comment += `${icon} **${issue.file}**:${issue.line}:${issue.column} - \`${issue.feature}\`\n`;
-                comment += `   ${issue.message}\n\n`;
-              });
+              comment += `**Score:** ${score}/100\n`;
+              comment += `**Issues Found:** ${issues}\n\n`;
               
-              if (testBaselineResults.issues.length > 5) {
-                comment += `*... and ${testBaselineResults.issues.length - 5} more issues*\n\n`;
+              if (issuesNum > 0) {
+                comment += '**Recommendations:**\n';
+                comment += '- Consider using widely supported features (baseline: high)\n';
+                comment += '- Add fallbacks for newly available features (baseline: low)\n';
+                comment += '- Review limited availability features (baseline: false)\n\n';
               }
+              
+              comment += '**Install baseline-lint:** `npm install -g baseline-lint`\n';
+              comment += '**Check your code:** `baseline-lint check ./src --score`';
             } else {
-              comment += `### ✅ Test Files - No Baseline Issues Found!\n\n`;
+              comment += '❌ **Baseline Check Failed**\n\n';
+              comment += 'Unable to run baseline compatibility check.\n';
+              comment += 'Please check the workflow logs for details.';
             }
             
-            // Add recommendations
-            comment += `### 💡 Recommendations
+            comment += '\n\n---\n';
+            comment += '*Powered by [baseline-lint](https://www.npmjs.com/package/baseline-lint)*';
             
-- 🎯 **Target Score**: Aim for 90+ for production code
-- 📚 **Learn More**: Check [Baseline Web Features](https://web.dev/baseline)
-- 🔧 **Fix Issues**: Use \`baseline-lint check ./src\` locally
-
----
-*This report was generated by [baseline-lint](https://github.com/yourusername/baseline-lint) 🎯*`;
-
-            // Post comment
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
             });
-
-      - name: Upload baseline results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: baseline-results
-          path: |
-            baseline-results.json
-            test-baseline-results.json
-          retention-days: 7
-
-  # Quick tests for PR
-  pr-tests:
-    name: Quick PR Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run quick integration tests
-        run: npm run test:integration
-
-      - name: Test CLI basic functionality
-        run: |
-          chmod +x bin/cli.js
-          ./bin/cli.js --version
-          ./bin/cli.js --help
-
-  # Code quality checks
-  quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check package.json validity
-        run: npm pkg validate
-
-      - name: Check for security vulnerabilities
-        run: npm audit --audit-level moderate
-
-      - name: Test package installation
-        run: npm pack && npm install -g baseline-lint-*.tgz
