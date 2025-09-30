@@ -43,6 +43,14 @@ jobs:
           echo "Running baseline-lint on changed files..."
           
           # Get changed files (including new files)
+          echo "Checking for changed files..."
+          echo "Git log --oneline -5:"
+          git log --oneline -5
+          echo "Files in current commit:"
+          git ls-tree --name-only HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "No CSS/JS files in HEAD"
+          echo "Files in previous commit:"
+          git ls-tree --name-only HEAD~1 | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "No CSS/JS files in HEAD~1"
+          
           CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
           
           if [ -z "$CHANGED_FILES" ]; then
