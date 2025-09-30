@@ -7,11 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.1] - 2025-10-01
+## [1.0.0] - 2025-10-01
 
-### 🛡️ Enhanced CI/CD & File Detection
+### 🎉 Initial Release + Enhanced CI/CD & File Detection
 
 #### Added
+- ✅ **Comprehensive CLI Tool** - Full command-line interface with multiple commands
+- ✅ **GitHub Action Integration** - Automated PR checks with detailed comments
+- ✅ **Visual Dashboard** - Interactive web interface with charts and analytics
+- ✅ **Configuration System** - Auto-discovery, validation, and merging of config files
+- ✅ **Enhanced JavaScript API Coverage** - 200+ APIs including modern ES2022+ features
+- ✅ **Robust File Handle Management** - Automatic cleanup and resource leak prevention
+- ✅ **Advanced Error Handling** - Custom error types, stack traces, and safe async wrappers
+- ✅ **LRU Cache System** - Optimized performance with configurable size limits
+- ✅ **Comprehensive Test Suite** - 315 individual test cases across 96 test suites
+- ✅ **Security Hardening** - Input validation, path sanitization, and CORS protection
+- ✅ **Complete CI/CD Pipeline** - Multi-platform testing and automated deployment
+- ✅ **Full TypeScript Support** - Comprehensive type definitions for all APIs
+- ✅ **Performance Monitoring** - Detailed metrics and profiling capabilities
+- ✅ **Advanced Logging System** - Structured output with multiple levels and formats
 - ✅ **Advanced File Detection System** - 5-strategy approach for reliable CSS/JS change detection
 - ✅ **Robust CI/CD Workflows** - Enhanced error handling and timeout management
 - ✅ **Smart PR Detection** - Automatic detection of changed files in pull requests
@@ -34,28 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🧪 **Testing** - Added comprehensive integration tests for CI scenarios
 - 📚 **Documentation** - Updated README and docs with new CI features
 - 🔍 **Debugging** - Added extensive debugging output for troubleshooting
-
----
-
-## [1.0.0] - 2025-10-01
-
-### 🎉 Initial Release
-
-#### Added
-- ✅ **Comprehensive CLI Tool** - Full command-line interface with multiple commands
-- ✅ **GitHub Action Integration** - Automated PR checks with detailed comments
-- ✅ **Visual Dashboard** - Interactive web interface with charts and analytics
-- ✅ **Configuration System** - Auto-discovery, validation, and merging of config files
-- ✅ **Enhanced JavaScript API Coverage** - 200+ APIs including modern ES2022+ features
-- ✅ **Robust File Handle Management** - Automatic cleanup and resource leak prevention
-- ✅ **Advanced Error Handling** - Custom error types, stack traces, and safe async wrappers
-- ✅ **LRU Cache System** - Optimized performance with configurable size limits
-- ✅ **Comprehensive Test Suite** - 315 individual test cases across 96 test suites
-- ✅ **Security Hardening** - Input validation, path sanitization, and CORS protection
-- ✅ **Complete CI/CD Pipeline** - Multi-platform testing and automated deployment
-- ✅ **Full TypeScript Support** - Comprehensive type definitions for all APIs
-- ✅ **Performance Monitoring** - Detailed metrics and profiling capabilities
-- ✅ **Advanced Logging System** - Structured output with multiple levels and formats
 
 #### CLI Commands
 - `baseline-lint check [paths...]` - Check files for Baseline compatibility
