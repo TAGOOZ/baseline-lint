@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 env:
   NODE_VERSION: '18'
 
@@ -26,16 +31,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build package
+        run: npm run build
+
       - name: Install baseline-lint globally
-        run: npm install -g baseline-lint
+        run: npm install -g .
 
       - name: Run baseline check
         id: baseline-check
         run: |
           echo "Running baseline-lint on changed files..."
           
-          # Get changed files
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+          # Get changed files (including new files)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
           
           if [ -z "$CHANGED_FILES" ]; then
             echo "No CSS/JS files changed"
@@ -47,8 +55,15 @@ jobs:
           
           echo "Changed files: $CHANGED_FILES"
           
+          # Test baseline-lint installation
+          echo "Testing baseline-lint installation:"
+          which baseline-lint || echo "baseline-lint not found in PATH"
+          baseline-lint --version || echo "baseline-lint version check failed"
+          
           # Run baseline check
-          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score 2>/dev/null || echo "{}")
+          echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
+          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint failed\"}")
+          echo "Baseline-lint result: $RESULT"
           
           # Extract score and issues count
           SCORE=$(echo "$RESULT" | jq -r '.score // 100')
@@ -83,6 +98,8 @@ jobs:
                 comment += '🎉 **Excellent Baseline Compatibility!**\n\n';
               } else if (scoreNum >= 70) {
                 comment += '⚠️ **Good Baseline Compatibility**\n\n';
+              } else if (scoreNum >= 50) {
+                comment += '🔶 **Fair Baseline Compatibility**\n\n';
               } else {
                 comment += '🚨 **Baseline Compatibility Issues Detected**\n\n';
               }
@@ -95,6 +112,9 @@ jobs:
                 comment += '- Consider using widely supported features (baseline: high)\n';
                 comment += '- Add fallbacks for newly available features (baseline: low)\n';
                 comment += '- Review limited availability features (baseline: false)\n\n';
+                comment += '**View detailed results:** Check the workflow logs for specific file issues.\n\n';
+              } else {
+                comment += '🎯 **Perfect! No baseline compatibility issues found.**\n\n';
               }
               
               comment += '**Install baseline-lint:** `npm install -g baseline-lint`\n';
@@ -102,7 +122,11 @@ jobs:
             } else {
               comment += '❌ **Baseline Check Failed**\n\n';
               comment += 'Unable to run baseline compatibility check.\n';
-              comment += 'Please check the workflow logs for details.';
+              comment += '**Debugging steps:**\n';
+              comment += '1. Check the [workflow logs](https://github.com/TAGOOZ/baseline-lint/actions) for details\n';
+              comment += '2. Ensure baseline-lint is properly installed\n';
+              comment += '3. Verify the files exist and are accessible\n\n';
+              comment += '**Manual check:** Run `baseline-lint check . --score` locally';
             }
             
             comment += '\n\n---\n';
