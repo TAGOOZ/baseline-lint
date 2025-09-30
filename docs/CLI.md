@@ -21,6 +21,37 @@ All commands support these global options:
 
 ---
 
+## NPM Scripts
+
+baseline-lint provides several convenient npm scripts for development and CI:
+
+### Development Scripts
+```bash
+npm run baseline-check    # Check source code baseline compatibility
+npm run baseline-score   # Calculate source code baseline score
+npm run test:performance # Run performance tests with export
+npm run lint:check       # Basic syntax validation
+npm run lint:fix         # Lint fixing (placeholder)
+```
+
+### Testing Scripts
+```bash
+npm run test            # Run all tests
+npm run test:unit       # Run unit tests only
+npm run test:integration # Run integration tests only
+npm run test:all         # Run all test suites
+```
+
+### CI/CD Scripts
+```bash
+npm run setup-ci        # Setup CI environment
+npm run dashboard        # Start visual dashboard
+npm run build           # Build TypeScript definitions
+npm run clean           # Clean build artifacts
+```
+
+---
+
 ## Commands
 
 ### `check [paths...]`

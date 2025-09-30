@@ -77,7 +77,7 @@ program
       const spinner = ora('Scanning files...').start();
       
       if (!paths || paths.length === 0) {
-        paths = ['./src', './styles'];
+        paths = ['./src', './styles', './*.css', './*.js'];
       }
       
       // Sanitize paths
@@ -87,11 +87,18 @@ program
       let cssFiles = [];
       if (!options.jsOnly) {
         for (const p of sanitizedPaths) {
-          const files = await glob(`${p}/**/*.css`, { 
-            ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
-            windowsPathsNoEscape: true
-          });
-          cssFiles.push(...files);
+          // Check if it's a specific CSS file
+          if (p.endsWith('.css')) {
+            cssFiles.push(p);
+          } else {
+            // Handle directory patterns and glob patterns
+            const pattern = p.includes('*') ? p : `${p}/**/*.css`;
+            const files = await glob(pattern, { 
+              ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+              windowsPathsNoEscape: true
+            });
+            cssFiles.push(...files);
+          }
         }
       }
       
@@ -99,11 +106,18 @@ program
       let jsFiles = [];
       if (!options.cssOnly) {
         for (const p of sanitizedPaths) {
-          const files = await glob(`${p}/**/*.{js,jsx,ts,tsx}`, { 
-            ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
-            windowsPathsNoEscape: true
-          });
-          jsFiles.push(...files);
+          // Check if it's a specific JS file
+          if (p.match(/\.(js|jsx|ts|tsx)$/)) {
+            jsFiles.push(p);
+          } else {
+            // Handle directory patterns and glob patterns
+            const pattern = p.includes('*') ? p : `${p}/**/*.{js,jsx,ts,tsx}`;
+            const files = await glob(pattern, { 
+              ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+              windowsPathsNoEscape: true
+            });
+            jsFiles.push(...files);
+          }
         }
       }
       
@@ -125,10 +139,12 @@ program
             const result = await analyzeCSSFile(file, { requiredLevel });
             fileAnalysisTracker.endFileAnalysis(fileOpId, result.issues || []);
             
+            // Store original issues for scoring
+            result.originalIssues = result.issues || [];
+            
             if (options.noWarnings) {
               result.issues = result.issues?.filter(i => i.severity === 'error') || [];
             }
-            // Always return result for scoring, but filter display issues
             result.type = 'css';
             return result;
           } catch (error) {
@@ -157,10 +173,12 @@ program
             const result = await analyzeJSFile(file, { requiredLevel });
             fileAnalysisTracker.endFileAnalysis(fileOpId, result.issues || []);
             
+            // Store original issues for scoring
+            result.originalIssues = result.issues || [];
+            
             if (options.noWarnings) {
               result.issues = result.issues?.filter(i => i.severity === 'error') || [];
             }
-            // Always return result for scoring, but filter display issues
             result.type = 'js';
             return result;
           } catch (error) {
@@ -185,7 +203,7 @@ program
       // Calculate score if requested
       let score = null;
       if (options.score) {
-        const allChecks = results.flatMap(r => r.issues || []);
+        const allChecks = results.flatMap(r => r.originalIssues || r.issues || []);
         score = calculateScore(allChecks);
       }
       
@@ -483,11 +501,15 @@ program
     const jsFiles = [];
     
     for (const p of paths) {
-      const css = await glob(`${p}/**/*.css`, { 
+      // Handle both directory patterns and direct file patterns
+      const cssPattern = p.includes('*') ? p : `${p}/**/*.css`;
+      const jsPattern = p.includes('*') ? p : `${p}/**/*.{js,jsx,ts,tsx}`;
+      
+      const css = await glob(cssPattern, { 
         ignore: ['**/node_modules/**', '**/dist/**'],
         windowsPathsNoEscape: true
       });
-      const js = await glob(`${p}/**/*.{js,jsx,ts,tsx}`, { 
+      const js = await glob(jsPattern, { 
         ignore: ['**/node_modules/**', '**/dist/**'],
         windowsPathsNoEscape: true
       });

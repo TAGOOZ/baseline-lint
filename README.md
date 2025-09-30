@@ -26,12 +26,14 @@
 ### The Solution ✨
 - ✅ Instant compatibility checks for CSS & JavaScript
 - 📊 Real-time Baseline scoring (0-100)
-- 🤖 Automated GitHub Action with PR comments
+- 🤖 Automated GitHub Action with smart file detection
 - 📈 Beautiful visual dashboard
 - 🔒 Enhanced security with input validation
 - ⚡ LRU Cache with size limits for optimal performance
 - 🧪 Comprehensive unit and integration tests (315 test cases)
 - 📘 Complete TypeScript support
+- 🛡️ Robust CI/CD workflows with multiple fallback strategies
+- 🔍 Advanced file detection for changed CSS/JS files in PRs
 
 ---
 
@@ -91,9 +93,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for proper file detection
       - run: npm install -g baseline-lint
-      - run: baseline-lint check ./src
+      - run: baseline-lint check ./src --score
 ```
+
+**Advanced Features:**
+- 🔍 **Smart File Detection**: Automatically detects changed CSS/JS files in PRs
+- 📊 **Baseline Scoring**: Calculates compatibility scores for changed files
+- 💬 **PR Comments**: Posts detailed compatibility reports on pull requests
+- 🛡️ **Robust Error Handling**: Multiple fallback strategies for reliable detection
 
 ### 3️⃣ Visual Dashboard
 ```bash
@@ -266,6 +276,10 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed version history and feature update
 - **315 test cases** across 96 test suites ensuring reliability
 - **200+ JavaScript APIs** supported with full Baseline integration
 - **Enterprise-grade** security and performance features
+- **🛡️ Enhanced CI/CD**: Robust workflows with smart file detection and multiple fallback strategies
+- **🔍 Advanced Detection**: 5-strategy file detection system for reliable CSS/JS change detection
+- **⚡ Performance**: Optimized batch processing and memory management
+- **🧪 Comprehensive Testing**: Integration tests for file detection, performance, and memory usage
 
 ---
 

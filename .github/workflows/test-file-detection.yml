@@ -1,0 +1,95 @@
+name: Test File Detection
+
+on:
+  push:
+    branches: [ main, develop, test-github-actions ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test-file-detection:
+    name: Test File Detection Logic
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history
+
+      - name: Test file detection
+        run: |
+          echo "=== Testing File Detection Logic ==="
+          
+          # Debug: Show git environment
+          echo "Git version: $(git --version)"
+          echo "Current branch: $(git branch --show-current)"
+          echo "Commit count: $(git rev-list --count HEAD)"
+          echo ""
+          
+          # Test the detection script
+          chmod +x scripts/detect-changed-files.sh
+          echo "Running detection script:"
+          CHANGED_FILES=$(./scripts/detect-changed-files.sh)
+          echo "Result: '$CHANGED_FILES'"
+          
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "✅ File detection working correctly"
+            echo "Found files:"
+            echo "$CHANGED_FILES" | while read -r file; do
+              echo "  - $file"
+            done
+          else
+            echo "⚠️ No CSS/JS files detected"
+          fi
+          
+          echo ""
+          echo "=== Testing Individual Strategies ==="
+          
+          # Test Strategy 1: HEAD~1 HEAD
+          echo "Strategy 1 (HEAD~1 HEAD):"
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            git diff --name-only HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "No CSS/JS files"
+          else
+            echo "HEAD~1 not available"
+          fi
+          
+          # Test Strategy 2: origin/main HEAD
+          echo "Strategy 2 (origin/main HEAD):"
+          if git rev-parse origin/main >/dev/null 2>&1; then
+            git diff --name-only origin/main...HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "No CSS/JS files"
+          else
+            echo "origin/main not available"
+          fi
+          
+          # Test Strategy 3: All files in HEAD
+          echo "Strategy 3 (All files in HEAD):"
+          git ls-tree --name-only HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "No CSS/JS files"
+
+      - name: Test baseline-lint on detected files
+        if: success()
+        run: |
+          echo "=== Testing Baseline-Lint on Detected Files ==="
+          
+          # Get changed files
+          CHANGED_FILES=$(./scripts/detect-changed-files.sh)
+          
+          if [ -n "$CHANGED_FILES" ] && [ "$CHANGED_FILES" != "No CSS/JS files found" ]; then
+            echo "Installing baseline-lint..."
+            npm install -g .
+            
+            echo "Running baseline-lint on detected files:"
+            echo "$CHANGED_FILES" | while read -r file; do
+              if [ -f "$file" ]; then
+                echo "Checking $file..."
+                baseline-lint check "$file" --score || echo "Failed to check $file"
+              fi
+            done
+          else
+            echo "No files to check"
+          fi

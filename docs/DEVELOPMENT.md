@@ -34,6 +34,41 @@ chmod +x bin/cli.js
 
 ---
 
+## CI/CD Development
+
+### Enhanced Workflows
+
+baseline-lint includes robust CI/CD workflows with advanced file detection:
+
+#### File Detection System
+The CI workflows use a 5-strategy file detection system:
+
+1. **GitHub PR Context**: Uses PR base/head SHAs when available
+2. **Base Ref Comparison**: Compares with the base branch (e.g., main)
+3. **Main Branch Comparison**: Fallback to main branch comparison
+4. **HEAD~1 Comparison**: For shallow clones
+5. **All Files Fallback**: Checks all CSS/JS files in current commit
+
+#### Workflow Files
+- `.github/workflows/ci.yml` - Main CI pipeline with comprehensive testing
+- `.github/workflows/pr-check.yml` - PR-specific baseline checking
+- `.github/workflows/release.yml` - Release automation
+- `.github/workflows/test-file-detection.yml` - File detection testing
+
+#### Testing CI Locally
+```bash
+# Test file detection logic
+./scripts/detect-changed-files.sh
+
+# Test baseline detection
+npm run baseline-check
+
+# Test performance
+npm run test:performance
+```
+
+---
+
 ## Development Workflow
 
 ### Running Tests

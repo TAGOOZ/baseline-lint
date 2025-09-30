@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.1] - 2025-10-01
+
+### 🛡️ Enhanced CI/CD & File Detection
+
+#### Added
+- ✅ **Advanced File Detection System** - 5-strategy approach for reliable CSS/JS change detection
+- ✅ **Robust CI/CD Workflows** - Enhanced error handling and timeout management
+- ✅ **Smart PR Detection** - Automatic detection of changed files in pull requests
+- ✅ **Comprehensive Debugging** - Detailed logging for troubleshooting CI issues
+- ✅ **Production Scripts** - Standalone file detection script for CI environments
+- ✅ **Enhanced NPM Scripts** - New scripts for baseline checking and performance testing
+- ✅ **Integration Tests** - Comprehensive tests for file detection and performance
+- ✅ **Memory Usage Testing** - Performance validation for large file processing
+
+#### Fixed
+- 🔧 **File Detection Issues** - Fixed git diff commands failing in CI environments
+- 🔧 **Shallow Clone Problems** - Added proper git history fetching
+- 🔧 **Timeout Issues** - Increased CI job timeouts from 5 to 10-15 minutes
+- 🔧 **Missing Base Branches** - Added fallback strategies for missing git references
+- 🔧 **Error Handling** - Improved error handling in CI workflows
+- 🔧 **Build Process** - Enhanced build step logging and error handling
+
+#### Enhanced
+- ⚡ **Performance** - Optimized file detection with multiple fallback strategies
+- 🧪 **Testing** - Added comprehensive integration tests for CI scenarios
+- 📚 **Documentation** - Updated README and docs with new CI features
+- 🔍 **Debugging** - Added extensive debugging output for troubleshooting
+
+---
+
 ## [1.0.0] - 2025-10-01
 
 ### 🎉 Initial Release
