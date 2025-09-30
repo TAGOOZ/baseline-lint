@@ -1,4 +1,4 @@
-// Test JavaScript file for GitHub Actions
+// Test JavaScript file for GitHub Actions - Updated to trigger baseline check
 
 // Widely supported features
 const numbers = [1, 2, 3, 4, 5];

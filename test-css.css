@@ -1,10 +1,11 @@
-/* Test CSS file for GitHub Actions */
+/* Test CSS file for GitHub Actions - Updated to trigger baseline check */
 .container {
   /* Widely supported - should pass */
   background-color: #f0f0f0;
   color: black;
   margin: 10px;
   padding: 20px;
+  /* Added new comment to trigger file change detection */
 }
 
 .modern-features {
