@@ -67,9 +67,11 @@ program
   .option('--batch-size <size>', 'Batch size for processing files (default: 25)', '25')
   .option('-c, --config <path>', 'Path to configuration file')
   .action(async (paths, options) => {
+    let operationId = null; // Declare outside try block
+    
     try {
       // Start performance monitoring
-      const operationId = performanceMonitor.startOperation('cli_check', {
+      operationId = performanceMonitor.startOperation('cli_check', {
         paths_count: paths?.length || 0,
         level: options.level,
         format: options.format
@@ -240,7 +242,9 @@ program
       await cleanupAndExit(0);
       
     } catch (error) {
-      performanceMonitor.endOperation(operationId, false, error);
+      if (operationId) {
+        performanceMonitor.endOperation(operationId, false, error);
+      }
       console.error(chalk.red('Error during check:'));
       console.error(chalk.gray(formatError(error)));
       await cleanupAndExit(1);
