@@ -418,27 +418,45 @@ export function getTempFileCount() {
 }
 
 /**
- * Process cleanup on process exit
+ * Setup process cleanup handlers (only if not already setup)
  */
-process.on('exit', () => {
-  // Synchronous cleanup for process exit
-  globalFileManager.cleanup().catch(() => {});
-  globalTempManager.cleanup().catch(() => {});
-});
+let processHandlersSetup = false;
 
-process.on('SIGINT', async () => {
-  // Cleanup on Ctrl+C
-  await cleanupAllFileHandles();
-  await cleanupTempFiles();
-  process.exit(0);
-});
+export function setupProcessHandlers() {
+  if (processHandlersSetup) return;
+  processHandlersSetup = true;
 
-process.on('SIGTERM', async () => {
-  // Cleanup on termination
-  await cleanupAllFileHandles();
-  await cleanupTempFiles();
-  process.exit(0);
-});
+  process.on('exit', () => {
+    // Synchronous cleanup for process exit
+    globalFileManager.cleanup().catch(() => {});
+    globalTempManager.cleanup().catch(() => {});
+  });
+
+  process.on('SIGINT', async () => {
+    // Cleanup on Ctrl+C
+    await cleanupAllFileHandles();
+    await cleanupTempFiles();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', async () => {
+    // Cleanup on termination
+    await cleanupAllFileHandles();
+    await cleanupTempFiles();
+    process.exit(0);
+  });
+}
+
+/**
+ * Remove process cleanup handlers
+ */
+export function removeProcessHandlers() {
+  if (!processHandlersSetup) return;
+  process.removeAllListeners('exit');
+  process.removeAllListeners('SIGINT');
+  process.removeAllListeners('SIGTERM');
+  processHandlersSetup = false;
+}
 
 /**
  * Export utilities

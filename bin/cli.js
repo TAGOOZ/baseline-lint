@@ -39,6 +39,10 @@ async function cleanupAndExit(code = 0) {
     await logger.close();
     performanceMonitor.stop();
     memoryMonitor.stop();
+    // Clean up file handles and remove process listeners
+    await cleanupAllFileHandles();
+    const { removeProcessHandlers } = await import('../src/utils/file-handler.js');
+    removeProcessHandlers();
   } catch (cleanupError) {
     // Ignore cleanup errors during exit
   }
