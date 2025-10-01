@@ -1,0 +1,11 @@
+/* Test file for PR comments */
+.test-pr {
+  display: flex; /* Widely supported */
+  justify-content: center; /* Widely supported */
+  align-items: center; /* Widely supported */
+}
+
+.test-new-feature {
+  container-type: inline-size; /* Newly available */
+  aspect-ratio: 16/9; /* Newly available */
+}
