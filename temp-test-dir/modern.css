@@ -1,0 +1,63 @@
+/* Modern CSS file with features that might trigger baseline-lint */
+
+.modern-layout {
+  /* Grid layout - mostly well supported now */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  
+  /* Gap - better supported now */
+  gap: 1rem;
+  
+  /* Container queries - newer feature with limited support */
+  container-type: inline-size;
+  
+  /* Logical properties - varying support */
+  margin-block: 1rem;
+  padding-inline: 1.5rem;
+}
+
+/* Container query - limited support in older browsers */
+@container (min-width: 400px) {
+  .nested-element {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+  }
+}
+
+.modern-card {
+  /* Aspect ratio - newer feature */
+  aspect-ratio: 16/9;
+  
+  /* Backdrop filters - limited support */
+  backdrop-filter: blur(10px);
+  
+  /* New color formats */
+  background-color: oklch(0.6 0.25 230);
+  color: lab(55% -10 0);
+  
+  /* Modern selectors */
+  &:has(:hover) {
+    background-color: hsl(200deg 30% 80%);
+  }
+  
+  /* Subgrid - newer feature with limited support */
+  display: grid;
+  grid-template-rows: subgrid;
+}
+
+@supports (selector(:has(*))) {
+  /* :has selector - very limited support */
+  .parent:has(.child:focus) {
+    outline: 2px solid blue;
+  }
+}
+
+/* Scroll timeline animation - experimental */
+@keyframes follow-scroll {
+  from { transform: translateY(0); }
+  to { transform: translateY(100px); }
+}
+
+.scroll-animation {
+  animation: follow-scroll linear;
+  animation-timeline: scroll();
+}

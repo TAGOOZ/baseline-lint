@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseline Lint Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "0.5rem",
+                        md: "calc(0.5rem - 2px)",
+                        sm: "calc(0.5rem - 4px)",
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .score-circle {
+            background: conic-gradient(
+                hsl(142.1 76.2% 36.3%) 0deg,
+                hsl(142.1 76.2% 36.3%) var(--score-angle, 324deg),
+                hsl(210 40% 96%) var(--score-angle, 324deg)
+            );
+        }
+        
+        .score-circle.warning {
+            background: conic-gradient(
+                hsl(47.9 95.8% 53.1%) 0deg,
+                hsl(47.9 95.8% 53.1%) var(--score-angle, 324deg),
+                hsl(210 40% 96%) var(--score-angle, 324deg)
+            );
+        }
+        
+        .score-circle.error {
+            background: conic-gradient(
+                hsl(0 84.2% 60.2%) 0deg,
+                hsl(0 84.2% 60.2%) var(--score-angle, 324deg),
+                hsl(210 40% 96%) var(--score-angle, 324deg)
+            );
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-background font-sans antialiased">
+    <!-- Header -->
+    <header class="border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+                        <i data-lucide="target" class="h-5 w-5 text-primary-foreground"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold">Baseline Lint</h1>
+                        <p class="text-sm text-muted-foreground">Web compatibility monitoring</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="refreshData()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+                        <i data-lucide="refresh-cw" class="h-4 w-4 mr-2"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="flex items-center justify-center min-h-[400px]">
+        <div class="text-center space-y-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p class="text-muted-foreground">Loading dashboard data...</p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main id="dashboard" class="container mx-auto px-4 py-6 space-y-6" style="display: none;">
+        <!-- Stats Overview -->
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <!-- Overall Score -->
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-2">
+                    <div class="flex items-center space-x-2 text-sm font-medium">
+                        <i data-lucide="gauge" class="h-4 w-4"></i>
+                        <span>Overall Score</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0">
+                    <div class="flex items-center justify-center">
+                        <div class="relative w-24 h-24">
+                            <div id="scoreCircle" class="w-24 h-24 rounded-full score-circle flex items-center justify-center">
+                                <span id="scoreValue" class="text-2xl font-bold text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="scoreDescription" class="text-center text-sm text-muted-foreground mt-2">Calculating...</p>
+                </div>
+            </div>
+
+            <!-- Total Files -->
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-2">
+                    <div class="flex items-center space-x-2 text-sm font-medium">
+                        <i data-lucide="files" class="h-4 w-4"></i>
+                        <span>Total Files</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0">
+                    <div class="text-2xl font-bold" id="totalFiles">--</div>
+                    <div class="flex space-x-4 text-xs text-muted-foreground mt-1">
+                        <span><span id="cssFiles">--</span> CSS</span>
+                        <span><span id="jsFiles">--</span> JS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Issues -->
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-2">
+                    <div class="flex items-center space-x-2 text-sm font-medium">
+                        <i data-lucide="alert-circle" class="h-4 w-4 text-destructive"></i>
+                        <span>Critical Issues</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0">
+                    <div class="text-2xl font-bold text-destructive" id="criticalIssues">--</div>
+                    <p class="text-xs text-muted-foreground mt-1">Need immediate attention</p>
+                </div>
+            </div>
+
+            <!-- Last Scan -->
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-2">
+                    <div class="flex items-center space-x-2 text-sm font-medium">
+                        <i data-lucide="clock" class="h-4 w-4"></i>
+                        <span>Last Scan</span>
+                    </div>
+                </div>
+                <div class="p-6 pt-0">
+                    <div class="text-sm font-medium" id="lastScan">--</div>
+                    <p class="text-xs text-muted-foreground mt-1">Auto-refresh enabled</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Sections -->
+        <div class="grid gap-6 lg:grid-cols-3">
+            <!-- Issues Breakdown -->
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="alert-triangle" class="h-5 w-5"></i>
+                        <h3 class="text-lg font-semibold">Issues Breakdown</h3>
+                    </div>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-destructive"></div>
+                            <span class="text-sm">Critical</span>
+                        </div>
+                        <span class="text-sm font-medium" id="criticalCount">--</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <span class="text-sm">Warnings</span>
+                        </div>
+                        <span class="text-sm font-medium" id="warnings">--</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <span class="text-sm">Info</span>
+                        </div>
+                        <span class="text-sm font-medium" id="infoIssues">--</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="text-sm">Clean Files</span>
+                        </div>
+                        <span class="text-sm font-medium" id="cleanFiles">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Analysis -->
+            <div class="lg:col-span-2 rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="file-text" class="h-5 w-5"></i>
+                        <h3 class="text-lg font-semibold">Recent Analysis</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3" id="recentFiles">
+                        <div class="text-sm text-muted-foreground">No recent analysis data available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 pb-0">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="zap" class="h-5 w-5"></i>
+                    <h3 class="text-lg font-semibold">Quick Actions</h3>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                    <button onclick="runAnalysis()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                        <i data-lucide="search" class="h-4 w-4 mr-2"></i>
+                        Run Analysis
+                    </button>
+                    <button onclick="viewLogs()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                        <i data-lucide="scroll-text" class="h-4 w-4 mr-2"></i>
+                        View Logs
+                    </button>
+                    <button onclick="exportReport()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                        <i data-lucide="download" class="h-4 w-4 mr-2"></i>
+                        Export Report
+                    </button>
+                    <a href="https://github.com/TAGOOZ/baseline-lint" target="_blank" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                        <i data-lucide="book-open" class="h-4 w-4 mr-2"></i>
+                        Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <div class="text-center text-sm text-muted-foreground">
+                Powered by <strong>baseline-lint</strong> v1.0.5 • 
+                <a href="https://github.com/TAGOOZ/baseline-lint" class="hover:underline">GitHub</a> • 
+                <a href="https://www.npmjs.com/package/baseline-lint" class="hover:underline">npm</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mock data for demonstration
+        const mockData = {
+            score: 94,
+            totalFiles: 47,
+            cssFiles: 12,
+            jsFiles: 35,
+            lastScan: new Date().toLocaleString(),
+            criticalIssues: 2,
+            warnings: 8,
+            infoIssues: 3,
+            cleanFiles: 34,
+            recentFiles: [
+                { name: 'src/components/Button.css', status: 'good', score: 100 },
+                { name: 'src/utils/helpers.js', status: 'warning', score: 85 },
+                { name: 'src/styles/main.css', status: 'error', score: 60 },
+                { name: 'src/components/Modal.js', status: 'good', score: 98 },
+                { name: 'src/pages/Dashboard.js', status: 'warning', score: 75 }
+            ]
+        };
+
+        function updateDashboard(data) {
+            // Update score
+            const scoreElement = document.getElementById('scoreValue');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreDescription = document.getElementById('scoreDescription');
+            
+            scoreElement.textContent = data.score;
+            scoreCircle.style.setProperty('--score-angle', `${(data.score / 100) * 360}deg`);
+            
+            if (data.score >= 90) {
+                scoreDescription.textContent = '🎉 Excellent compatibility!';
+                scoreCircle.style.background = `conic-gradient(#4caf50 0deg, #4caf50 ${(data.score / 100) * 360}deg, #e0e0e0 ${(data.score / 100) * 360}deg)`;
+            } else if (data.score >= 70) {
+                scoreDescription.textContent = '⚠️ Good with some issues';
+                scoreCircle.style.background = `conic-gradient(#ff9800 0deg, #ff9800 ${(data.score / 100) * 360}deg, #e0e0e0 ${(data.score / 100) * 360}deg)`;
+            } else {
+                scoreDescription.textContent = '🚨 Needs attention';
+                scoreCircle.style.background = `conic-gradient(#f44336 0deg, #f44336 ${(data.score / 100) * 360}deg, #e0e0e0 ${(data.score / 100) * 360}deg)`;
+            }
+
+            // Update stats
+            document.getElementById('totalFiles').textContent = data.totalFiles;
+            document.getElementById('cssFiles').textContent = data.cssFiles;
+            document.getElementById('jsFiles').textContent = data.jsFiles;
+            document.getElementById('lastScan').textContent = data.lastScan;
+            document.getElementById('criticalIssues').textContent = data.criticalIssues;
+            document.getElementById('warnings').textContent = data.warnings;
+            document.getElementById('infoIssues').textContent = data.infoIssues;
+            document.getElementById('cleanFiles').textContent = data.cleanFiles;
+
+            // Update recent files
+            const recentFilesContainer = document.getElementById('recentFiles');
+            if (data.recentFiles && data.recentFiles.length > 0) {
+                recentFilesContainer.innerHTML = data.recentFiles.map(file => `
+                    <div class="file-item">
+                        <span>${file.name}</span>
+                        <span class="file-status status-${file.status}">${file.score}/100</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadDashboardData() {
+            // Simulate API call
+            setTimeout(() => {
+                updateDashboard(mockData);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            }, 1500);
+        }
+
+        function refreshData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            
+            // Update mock data with slight variations
+            mockData.score = Math.max(60, Math.min(100, mockData.score + Math.floor(Math.random() * 10 - 5)));
+            mockData.lastScan = new Date().toLocaleString();
+            
+            loadDashboardData();
+        }
+
+        function runAnalysis() {
+            alert('Analysis feature would trigger a new baseline-lint scan on your project files.');
+        }
+
+        function viewLogs() {
+            alert('Logs feature would show detailed scan logs and history.');
+        }
+
+        function exportReport() {
+            alert('Export feature would generate a detailed PDF/HTML report.');
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            if (document.getElementById('dashboard').style.display !== 'none') {
+                refreshData();
+            }
+        }, 300000);
+    </script>
+</body>
+</html>

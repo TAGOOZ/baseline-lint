@@ -16,7 +16,6 @@
     "baseline-score": "node bin/cli.js score ./src",
     "test:performance": "node bin/cli.js performance --export performance-results.json",
     "setup-ci": "node scripts/setup-ci.js",
-    "dashboard": "node scripts/serve-dashboard.js",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "build": "tsc",
@@ -66,8 +65,7 @@
   "files": [
     "src/",
     "bin/",
-    "scripts/",
-    "dashboard/",
+  "scripts/",
     "index.d.ts",
     "types/",
     "README.md",

@@ -65,6 +65,7 @@ baseline-lint check ./src
 baseline-lint score ./src
 ```
 
+
 ### Or use directly with npx (no install)
 
 ```bash
@@ -197,13 +198,6 @@ jobs:
 - ⚡ **Fast Execution**: 3-minute timeout with efficient file processing
 - 🚀 **No Hanging**: Fixed workflow hanging issue with proper exit handling
 
-### 3️⃣ Visual Dashboard
-```bash
-npm run dashboard
-# Opens http://localhost:3000
-```
-
----
 
 ## 🎨 Example Output
 
