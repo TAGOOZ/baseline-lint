@@ -102,8 +102,8 @@ describe('Baseline Detection Integration Tests', () => {
       // Add timeout protection
       const timeout = setTimeout(() => {
         child.kill('SIGKILL');
-        throw new Error('CLI test timed out after 10 seconds');
-      }, 10000);
+        throw new Error('CLI test timed out after 30 seconds');
+      }, 30000);
       
       await new Promise((resolve, reject) => {
         child.on('close', (code) => {

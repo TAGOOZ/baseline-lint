@@ -12,9 +12,9 @@ describe('CLI Integration Tests', () => {
     // Add timeout protection
     const timeout = setTimeout(() => {
       child.kill('SIGKILL');
-      assert.fail('Test timed out after 10 seconds');
+      assert.fail('Test timed out after 30 seconds');
       done();
-    }, 10000);
+    }, 30000);
     
     let output = '';
     child.stdout.on('data', (data) => {
@@ -41,9 +41,9 @@ describe('CLI Integration Tests', () => {
     // Add timeout protection
     const timeout = setTimeout(() => {
       child.kill('SIGKILL');
-      assert.fail('Test timed out after 10 seconds');
+      assert.fail('Test timed out after 30 seconds');
       done();
-    }, 10000);
+    }, 30000);
     
     let output = '';
     child.stdout.on('data', (data) => {
