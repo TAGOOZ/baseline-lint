@@ -1,4 +1,4 @@
-name: PR Baseline Check
+name: PR Baseline Check (Fixed)
 
 on:
   pull_request:
@@ -16,13 +16,13 @@ jobs:
   baseline-check:
     name: Baseline Compatibility Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history to enable proper git diff
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,11 +36,7 @@ jobs:
       - name: Build package
         run: |
           echo "Building baseline-lint package..."
-          npm run build || {
-            echo "Build failed, but continuing with source files..."
-            echo "This is expected if TypeScript build is not configured"
-          }
-          echo "Build step completed"
+          npm run build || echo "Build step skipped (not required)"
 
       - name: Install baseline-lint globally
         run: npm install -g .
@@ -48,136 +44,68 @@ jobs:
       - name: Run baseline check
         id: baseline-check
         run: |
-          echo "Running baseline-lint on changed files..."
-          
-          # Debug: Show git environment
-          echo "=== Git Environment Debug ==="
-          echo "Git version: $(git --version)"
-          echo "Current branch: $(git branch --show-current)"
-          echo "Commit count: $(git rev-list --count HEAD)"
-          echo "Recent commits:"
-          git log --oneline -3
-          echo ""
-          
-          # Debug: Show available branches
-          echo "=== Available Branches ==="
-          echo "Local branches:"
-          git branch
-          echo "Remote branches:"
-          git branch -r
-          echo ""
-          
-          # Debug: Show GitHub context
-          echo "=== GitHub Context ==="
-          echo "Event: ${{ github.event_name }}"
-          echo "Base ref: ${{ github.base_ref }}"
-          echo "Head ref: ${{ github.head_ref }}"
-          echo "PR base SHA: ${{ github.event.pull_request.base.sha }}"
-          echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
-          echo ""
-          
-          # Initialize variables
-          CHANGED_FILES=""
-          
-          # Strategy 1: Use GitHub context for PR events
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "=== Strategy 1: Using GitHub PR Context ==="
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            
-            if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
-              echo "Comparing $BASE_SHA..$HEAD_SHA"
-              CHANGED_FILES=$(git diff --name-only --diff-filter=AM $BASE_SHA $HEAD_SHA | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-              echo "Strategy 1 result: '$CHANGED_FILES'"
-            else
-              echo "Strategy 1 failed: Missing SHA values"
-            fi
-          fi
-          
-          # Strategy 2: Use base ref comparison
-          if [ -z "$CHANGED_FILES" ] && [ -n "${{ github.base_ref }}" ]; then
-            echo "=== Strategy 2: Using Base Ref Comparison ==="
-            BASE_REF="${{ github.base_ref }}"
-            echo "Comparing origin/$BASE_REF...HEAD"
-            
-            # Ensure we have the base branch
-            git fetch origin $BASE_REF:$BASE_REF || echo "Could not fetch base branch"
-            
-            if git rev-parse origin/$BASE_REF >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/$BASE_REF...HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-              echo "Strategy 2 result: '$CHANGED_FILES'"
-            else
-              echo "Strategy 2 failed: Base branch not available"
-            fi
-          fi
-          
-          # Strategy 3: Use main branch comparison
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "=== Strategy 3: Using Main Branch Comparison ==="
-            echo "Comparing origin/main...HEAD"
-            
-            # Ensure we have main branch
-            git fetch origin main:main || echo "Could not fetch main branch"
-            
-            if git rev-parse origin/main >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only --diff-filter=AM origin/main...HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-              echo "Strategy 3 result: '$CHANGED_FILES'"
-            else
-              echo "Strategy 3 failed: Main branch not available"
-            fi
-          fi
-          
-          # Strategy 4: Use HEAD~1 comparison (for shallow clones)
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "=== Strategy 4: Using HEAD~1 Comparison ==="
-            if git rev-parse HEAD~1 >/dev/null 2>&1; then
-              CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-              echo "Strategy 4 result: '$CHANGED_FILES'"
-            else
-              echo "Strategy 4 failed: HEAD~1 not available"
-            fi
-          fi
-          
-          # Strategy 5: Check all files in current commit
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "=== Strategy 5: Checking All Files in Current Commit ==="
-            CHANGED_FILES=$(git ls-tree --name-only HEAD | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-            echo "Strategy 5 result: '$CHANGED_FILES'"
-            echo "Note: This will check all CSS/JS files, not just changed ones"
-          fi
-          
-          # Final check
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "=== No CSS/JS Files Found ==="
-            echo "No CSS/JS files changed or found"
-            echo "result=no-changes" >> $GITHUB_OUTPUT
-            echo "score=100" >> $GITHUB_OUTPUT
-            echo "issues=0" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          echo "=== Final Result ==="
-          echo "Changed files: $CHANGED_FILES"
+          echo "=== Starting Baseline Check ==="
           
           # Test baseline-lint installation
           echo "Testing baseline-lint installation:"
           which baseline-lint || echo "baseline-lint not found in PATH"
           baseline-lint --version || {
-            echo "baseline-lint version check failed"
+            echo "❌ baseline-lint version check failed"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 1
           }
           
-          # Run baseline check
+          # Find changed files using a simpler approach
+          echo "=== Finding Changed Files ==="
+          
+          # Get changed files from the PR
+          CHANGED_FILES=""
+          
+          # Try to get files from PR context first
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Using PR context to find changed files..."
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            
+            if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
+              echo "Comparing $BASE_SHA..$HEAD_SHA"
+              CHANGED_FILES=$(git diff --name-only --diff-filter=AM $BASE_SHA $HEAD_SHA | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+              echo "Found files: $CHANGED_FILES"
+            fi
+          fi
+          
+          # Fallback: check all CSS/JS files in current commit
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "Fallback: Checking all CSS/JS files in current commit..."
+            CHANGED_FILES=$(find . -name "*.css" -o -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -10)
+            echo "Found files: $CHANGED_FILES"
+          fi
+          
+          # Final check
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "=== No CSS/JS Files Found ==="
+            echo "No CSS/JS files found to check"
+            echo "result=no-changes" >> $GITHUB_OUTPUT
+            echo "score=100" >> $GITHUB_OUTPUT
+            echo "issues=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "=== Running Baseline Check ==="
+          echo "Files to check: $CHANGED_FILES"
+          
+          # Run baseline check with timeout
           echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
-          RESULT=$(baseline-lint check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint failed\"}")
+          
+          # Use timeout to prevent hanging
+          RESULT=$(timeout 60s baseline-lint check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint timed out or failed\"}")
           echo "Baseline-lint result: $RESULT"
           
           # Check if the result contains an error
           if echo "$RESULT" | grep -q '"error"'; then
-            echo "baseline-lint execution failed"
+            echo "❌ baseline-lint execution failed or timed out"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
@@ -192,8 +120,8 @@ jobs:
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "issues=$ISSUES" >> $GITHUB_OUTPUT
           
-          echo "Baseline Score: $SCORE/100"
-          echo "Issues Found: $ISSUES"
+          echo "✅ Baseline Score: $SCORE/100"
+          echo "✅ Issues Found: $ISSUES"
 
       - name: Comment PR
         if: always()
@@ -207,7 +135,7 @@ jobs:
             let comment = '## 🔍 Baseline Compatibility Check\n\n';
             
             if (result === 'no-changes') {
-              comment += '✅ **No CSS/JS files were changed in this PR.**\n\n';
+              comment += '✅ **No CSS/JS files were found to check.**\n\n';
               comment += 'No baseline compatibility check needed.';
             } else if (result === 'completed') {
               const scoreNum = parseInt(score);
