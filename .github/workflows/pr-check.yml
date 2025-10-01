@@ -101,23 +101,23 @@ jobs:
           echo "✅ Issues: $ISSUES"
 
       - name: Comment PR
-        if: always()
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
             const result = '${{ steps.baseline-check.outputs.result }}';
             const score = '${{ steps.baseline-check.outputs.score }}';
             const issues = '${{ steps.baseline-check.outputs.issues }}';
-            
+
             let comment = '## 🔍 Baseline Compatibility Check\n\n';
-            
+
             if (result === 'no-changes') {
               comment += '✅ **No CSS/JS files were found to check.**\n\n';
               comment += 'No baseline compatibility check needed.';
             } else if (result === 'completed') {
               const scoreNum = parseInt(score);
               const issuesNum = parseInt(issues);
-              
+
               if (scoreNum >= 90) {
                 comment += '🎉 **Excellent Baseline Compatibility!**\n\n';
               } else if (scoreNum >= 70) {
@@ -127,10 +127,10 @@ jobs:
               } else {
                 comment += '🚨 **Baseline Compatibility Issues Detected**\n\n';
               }
-              
+
               comment += `**Score:** ${score}/100\n`;
               comment += `**Issues Found:** ${issues}\n\n`;
-              
+
               if (issuesNum > 0) {
                 comment += '**Recommendations:**\n';
                 comment += '- Use widely supported features (baseline: high)\n';
@@ -139,7 +139,7 @@ jobs:
               } else {
                 comment += '🎯 **Perfect! No baseline compatibility issues found.**\n\n';
               }
-              
+
               comment += '**Install baseline-lint:** `npm install -g baseline-lint`\n';
               comment += '**Check your code:** `baseline-lint check ./src --score`';
             } else {
@@ -151,10 +151,10 @@ jobs:
               comment += '3. Verify the files exist and are accessible\n\n';
               comment += '**Manual check:** Run `baseline-lint check . --score` locally';
             }
-            
+
             comment += '\n\n---\n';
             comment += '*Powered by [baseline-lint](https://www.npmjs.com/package/baseline-lint)*';
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
