@@ -44,7 +44,6 @@
     "src/**/*",
     "bin/**/*",
     "scripts/**/*",
-    "test/**/*",
     "types/**/*",
     "*.d.ts"
   ],
@@ -54,6 +53,8 @@
     "coverage",
     "**/*.test.js",
     "**/*.spec.js",
+    "test/**/*",
+    "temp-test-dir/**/*",
     "dashboard/**/*"
   ],
   "ts-node": {
