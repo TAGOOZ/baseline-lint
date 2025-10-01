@@ -1,0 +1,46 @@
+/* Test PR CSS file with various baseline compatibility issues */
+
+.container {
+  /* Widely available - should pass */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  
+  /* Newly available - should warn */
+  backdrop-filter: blur(10px);
+  aspect-ratio: 16/9;
+  
+  /* Limited availability - should error */
+  color-scheme: light dark;
+  scroll-behavior: smooth;
+}
+
+.button {
+  /* Widely available */
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  
+  /* Newly available */
+  transition: all 0.3s ease;
+  transform: scale(1);
+  
+  /* Limited availability */
+  backdrop-filter: blur(5px);
+}
+
+/* CSS Custom Properties - should warn */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+}
+
+/* Container queries - limited availability */
+@container (min-width: 300px) {
+  .card {
+    padding: 1rem;
+  }
+}
