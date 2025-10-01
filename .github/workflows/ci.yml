@@ -199,10 +199,12 @@ jobs:
           baseline-lint --version || echo "Version check completed"
 
       - name: Test installed package functionality
+        shell: bash
+        timeout-minutes: 4
         run: |
           echo "Testing installed baseline-lint package..."
-          node bin/cli.js check ./src --score || echo "Package test completed with issues"
-          node bin/cli.js score ./src || echo "Package scoring completed"
+          timeout 240s node bin/cli.js check ./src --score || echo "Package test completed with issues"
+          timeout 240s node bin/cli.js score ./src || echo "Package scoring completed"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
