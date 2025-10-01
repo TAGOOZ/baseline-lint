@@ -24,7 +24,7 @@
     "lint:check": "echo 'Running basic syntax check...' && node -c bin/cli.js && node -c src/index.js",
     "lint:fix": "echo 'Lint fixing not implemented yet - use your preferred formatter'",
     "clean": "rm -rf dist .tsbuildinfo",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "npm run clean && npm run build && npm run test:all"
   },
   "keywords": [
     "baseline",
