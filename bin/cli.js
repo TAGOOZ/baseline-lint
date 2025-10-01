@@ -519,101 +519,111 @@ program
   .option('-l, --level <level>', 'Baseline level: widely|newly', 'newly')
   .option('--batch-size <size>', 'Batch size for processing files (default: 50)', '50')
   .action(async (paths, options) => {
-    if (!paths || paths.length === 0) {
-      paths = ['./src'];
+    try {
+      if (!paths || paths.length === 0) {
+        paths = ['./src'];
+      }
+      
+      const spinner = ora('Calculating score...').start();
+      
+      // Find all files
+      const cssFiles = [];
+      const jsFiles = [];
+      
+      for (const p of paths) {
+        // Handle both directory patterns and direct file patterns
+        const cssPattern = p.includes('*') ? p : `${p}/**/*.css`;
+        const jsPattern = p.includes('*') ? p : `${p}/**/*.{js,jsx,ts,tsx}`;
+        
+        const css = await glob(cssPattern, { 
+          ignore: ['**/node_modules/**', '**/dist/**'],
+          windowsPathsNoEscape: true
+        });
+        const js = await glob(jsPattern, { 
+          ignore: ['**/node_modules/**', '**/dist/**'],
+          windowsPathsNoEscape: true
+        });
+        cssFiles.push(...css);
+        jsFiles.push(...js);
+      }
+      
+      const totalFiles = cssFiles.length + jsFiles.length;
+      const requiredLevel = options.level === 'widely' ? 'high' : 'low';
+      const allChecks = [];
+      
+      // Process files in batches for better performance
+      const BATCH_SIZE = parseInt(options.batchSize) || 50; // Configurable batch size
+      
+      // Process CSS files in batches
+      for (let i = 0; i < cssFiles.length; i += BATCH_SIZE) {
+        const batch = cssFiles.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(async (file) => {
+          try {
+            const result = await analyzeCSSFile(file, { requiredLevel });
+            return result.issues || [];
+          } catch (error) {
+            console.error(chalk.gray(`Warning: Could not analyze ${file}: ${error.message}`));
+            return [];
+          }
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(issues => allChecks.push(...issues));
+        
+        // Update progress
+        const processed = Math.min(i + BATCH_SIZE, cssFiles.length);
+        spinner.text = `Processing CSS files... ${processed}/${cssFiles.length}`;
+      }
+      
+      // Process JS files in batches
+      for (let i = 0; i < jsFiles.length; i += BATCH_SIZE) {
+        const batch = jsFiles.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(async (file) => {
+          try {
+            const result = await analyzeJSFile(file, { requiredLevel });
+            return result.issues || [];
+          } catch (error) {
+            console.error(chalk.gray(`Warning: Could not analyze ${file}: ${error.message}`));
+            return [];
+          }
+        });
+        
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(issues => allChecks.push(...issues));
+        
+        // Update progress
+        const processed = Math.min(i + BATCH_SIZE, jsFiles.length);
+        spinner.text = `Processing JS files... ${processed}/${jsFiles.length}`;
+      }
+      
+      const score = calculateScore(allChecks);
+      
+      spinner.stop();
+      
+      console.log();
+      console.log(chalk.bold('📊 Baseline Compatibility Score'));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log();
+      
+      const scoreColor = score >= 90 ? chalk.green : score >= 70 ? chalk.yellow : chalk.red;
+      console.log(`  ${scoreColor.bold(`${score}/100`)}`);
+      console.log();
+      
+      console.log(chalk.bold('Details:'));
+      console.log(`  Total files analyzed: ${totalFiles}`);
+      console.log(`  Total checks: ${allChecks.length}`);
+      console.log(`  Errors: ${allChecks.filter(c => c.severity === 'error').length}`);
+      console.log(`  Warnings: ${allChecks.filter(c => c.severity === 'warning').length}`);
+      console.log();
+      
+      // Ensure proper cleanup on successful completion
+      await cleanupAndExit(0);
+      
+    } catch (error) {
+      console.error(chalk.red('Score calculation error:'));
+      console.error(chalk.gray(formatError(error)));
+      await cleanupAndExit(1);
     }
-    
-    const spinner = ora('Calculating score...').start();
-    
-    // Find all files
-    const cssFiles = [];
-    const jsFiles = [];
-    
-    for (const p of paths) {
-      // Handle both directory patterns and direct file patterns
-      const cssPattern = p.includes('*') ? p : `${p}/**/*.css`;
-      const jsPattern = p.includes('*') ? p : `${p}/**/*.{js,jsx,ts,tsx}`;
-      
-      const css = await glob(cssPattern, { 
-        ignore: ['**/node_modules/**', '**/dist/**'],
-        windowsPathsNoEscape: true
-      });
-      const js = await glob(jsPattern, { 
-        ignore: ['**/node_modules/**', '**/dist/**'],
-        windowsPathsNoEscape: true
-      });
-      cssFiles.push(...css);
-      jsFiles.push(...js);
-    }
-    
-    const totalFiles = cssFiles.length + jsFiles.length;
-    const requiredLevel = options.level === 'widely' ? 'high' : 'low';
-    const allChecks = [];
-    
-    // Process files in batches for better performance
-    const BATCH_SIZE = parseInt(options.batchSize) || 50; // Configurable batch size
-    
-    // Process CSS files in batches
-    for (let i = 0; i < cssFiles.length; i += BATCH_SIZE) {
-      const batch = cssFiles.slice(i, i + BATCH_SIZE);
-      const batchPromises = batch.map(async (file) => {
-        try {
-          const result = await analyzeCSSFile(file, { requiredLevel });
-          return result.issues || [];
-        } catch (error) {
-          console.error(chalk.gray(`Warning: Could not analyze ${file}: ${error.message}`));
-          return [];
-        }
-      });
-      
-      const batchResults = await Promise.all(batchPromises);
-      batchResults.forEach(issues => allChecks.push(...issues));
-      
-      // Update progress
-      const processed = Math.min(i + BATCH_SIZE, cssFiles.length);
-      spinner.text = `Processing CSS files... ${processed}/${cssFiles.length}`;
-    }
-    
-    // Process JS files in batches
-    for (let i = 0; i < jsFiles.length; i += BATCH_SIZE) {
-      const batch = jsFiles.slice(i, i + BATCH_SIZE);
-      const batchPromises = batch.map(async (file) => {
-        try {
-          const result = await analyzeJSFile(file, { requiredLevel });
-          return result.issues || [];
-        } catch (error) {
-          console.error(chalk.gray(`Warning: Could not analyze ${file}: ${error.message}`));
-          return [];
-        }
-      });
-      
-      const batchResults = await Promise.all(batchPromises);
-      batchResults.forEach(issues => allChecks.push(...issues));
-      
-      // Update progress
-      const processed = Math.min(i + BATCH_SIZE, jsFiles.length);
-      spinner.text = `Processing JS files... ${processed}/${jsFiles.length}`;
-    }
-    
-    const score = calculateScore(allChecks);
-    
-    spinner.stop();
-    
-    console.log();
-    console.log(chalk.bold('📊 Baseline Compatibility Score'));
-    console.log(chalk.gray('─'.repeat(50)));
-    console.log();
-    
-    const scoreColor = score >= 90 ? chalk.green : score >= 70 ? chalk.yellow : chalk.red;
-    console.log(`  ${scoreColor.bold(`${score}/100`)}`);
-    console.log();
-    
-    console.log(chalk.bold('Details:'));
-    console.log(`  Total files analyzed: ${totalFiles}`);
-    console.log(`  Total checks: ${allChecks.length}`);
-    console.log(`  Errors: ${allChecks.filter(c => c.severity === 'error').length}`);
-    console.log(`  Warnings: ${allChecks.filter(c => c.severity === 'warning').length}`);
-    console.log();
   });
 
 /**
