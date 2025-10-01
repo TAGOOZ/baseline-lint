@@ -180,3 +180,16 @@ pnpm-lock.yaml
 # Local development
 .local
 *.local
+
+# Video production and demo files (created for hackathon)
+VIDEO-SCRIPT.md
+VIDEO-DEMO-SCRIPT.sh
+VIDEO-PRODUCTION-CHECKLIST.md
+README-ENHANCED.md
+DEMO-EXAMPLES.css
+test-all-commands.sh
+*_output.txt
+
+# Demo and example files for video
+demo-examples.css
+demo-examples.js

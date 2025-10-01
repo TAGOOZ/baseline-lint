@@ -1,0 +1,62 @@
+/* 
+ * baseline-compatible.css - CSS with good baseline compatibility
+ * This file demonstrates proper baseline-compatible patterns
+ */
+
+.baseline-card {
+  /* ✅ All widely available features */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  background: linear-gradient(45deg, #ff0000, #0000ff);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.safe-interactive {
+  /* ✅ All widely available */
+  position: relative;
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.safe-interactive:hover {
+  transform: translateX(10px);
+}
+
+.safe-form-input {
+  /* ✅ All widely available */
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.safe-form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Progressive enhancement for newer features */
+@supports (container-type: inline-size) {
+  .baseline-card {
+    container-type: inline-size;
+  }
+  
+  @container (min-width: 400px) {
+    .baseline-card {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+@supports selector(:has(*)) {
+  .baseline-card:has(.image) {
+    grid-template-areas: "image content";
+    grid-template-columns: 200px 1fr;
+  }
+}

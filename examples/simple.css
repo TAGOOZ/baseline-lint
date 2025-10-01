@@ -1,0 +1,35 @@
+/* 
+ * simple.css - Simple CSS for basic testing
+ * This file has clear, easily detectable features
+ */
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-properties {
+  --primary-color: #3b82f6;
+  --spacing: 1rem;
+  color: var(--primary-color);
+  padding: var(--spacing);
+}
+
+.modern-layout {
+  container-type: inline-size;
+}
+
+.problematic-background {
+  background: color-mix(in srgb, red, blue);
+}
+
+.has-selector:has(img) {
+  border: 2px solid red;
+}

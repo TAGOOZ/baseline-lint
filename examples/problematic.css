@@ -1,0 +1,48 @@
+/* 
+ * problematic.css - CSS with mixed baseline compatibility
+ * This file demonstrates features with different baseline statuses
+ */
+
+.modern-card {
+  /* ✅ WIDELY AVAILABLE - Safe to use everywhere */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  border-radius: 8px;
+  padding: 1rem;
+  
+  /* ⚠️ NEWLY AVAILABLE - Use with caution */
+  container-type: inline-size;
+  
+  /* ❌ LIMITED SUPPORT - Needs fallbacks */
+  background: color-mix(in srgb, #ff0000 50%, #0000ff);
+}
+
+.interactive-element {
+  /* ❌ LIMITED SUPPORT */
+  view-transition-name: slide-in;
+  
+  /* ✅ WIDELY AVAILABLE */
+  transition: transform 0.3s ease;
+  transform: translateX(0);
+}
+
+.form-input {
+  /* ❌ LIMITED SUPPORT */
+  accent-color: #3b82f6;
+  
+  /* ✅ WIDELY AVAILABLE */
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+@container (min-width: 400px) {
+  .modern-card {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card:has(.image) {
+  grid-template-areas: "image content";
+}

@@ -49,6 +49,13 @@ async function cleanupAndExit(code = 0) {
   process.exit(code);
 }
 
+/**
+ * Simple exit for basic commands
+ */
+function simpleExit(code = 0) {
+  process.exit(code);
+}
+
 const program = new Command();
 
 program
@@ -267,44 +274,52 @@ program
   .description('List features by Baseline status: widely|newly|limited')
   .option('-g, --group <group>', 'Filter by group (css, javascript, etc.)')
   .option('-c, --count', 'Show count only')
-  .action((status, options) => {
-    const statusMap = {
-      'widely': 'high',
-      'newly': 'low',
-      'limited': false
-    };
-    
-    const baselineStatus = statusMap[status];
-    if (baselineStatus === undefined) {
-      console.error(chalk.red('Invalid status. Use: widely, newly, or limited'));
-      process.exit(1);
-    }
-    
-    let features = getFeaturesByStatus(baselineStatus);
-    
-    if (options.group) {
-      features = features.filter(f => f.group === options.group);
-    }
-    
-    if (options.count) {
-      console.log(features.length);
-      return;
-    }
-    
-    console.log(chalk.bold(`\n${status.toUpperCase()} Available Features (${features.length}):\n`));
-    
-    features.slice(0, 50).forEach(feature => {
-      const date = feature.status.baseline_low_date || feature.status.baseline_high_date;
-      console.log(chalk.cyan(`  • ${feature.name}`));
-      console.log(chalk.gray(`    ${feature.id}${date ? ` - since ${date}` : ''}`));
-      if (feature.description) {
-        console.log(chalk.gray(`    ${feature.description.slice(0, 80)}...`));
+  .action(async (status, options) => {
+    try {
+      const statusMap = {
+        'widely': 'high',
+        'newly': 'low',
+        'limited': false
+      };
+      
+      const baselineStatus = statusMap[status];
+      if (baselineStatus === undefined) {
+        console.error(chalk.red('Invalid status. Use: widely, newly, or limited'));
+        await cleanupAndExit(1);
       }
-      console.log();
-    });
-    
-    if (features.length > 50) {
-      console.log(chalk.gray(`  ... and ${features.length - 50} more\n`));
+      
+      let features = getFeaturesByStatus(baselineStatus);
+      
+      if (options.group) {
+        features = features.filter(f => f.group === options.group);
+      }
+      
+      if (options.count) {
+        console.log(features.length);
+        simpleExit(0);
+      }
+      
+      console.log(chalk.bold(`\n${status.toUpperCase()} Available Features (${features.length}):\n`));
+      
+      features.slice(0, 50).forEach(feature => {
+        const date = feature.status.baseline_low_date || feature.status.baseline_high_date;
+        console.log(chalk.cyan(`  • ${feature.name}`));
+        console.log(chalk.gray(`    ${feature.id}${date ? ` - since ${date}` : ''}`));
+        if (feature.description) {
+          console.log(chalk.gray(`    ${feature.description.slice(0, 80)}...`));
+        }
+        console.log();
+      });
+      
+      if (features.length > 50) {
+        console.log(chalk.gray(`  ... and ${features.length - 50} more\n`));
+      }
+      
+      simpleExit(0);
+    } catch (error) {
+      console.error(chalk.red('Error listing features:'));
+      console.error(chalk.gray(formatError(error)));
+      simpleExit(1);
     }
   });
 
@@ -314,27 +329,35 @@ program
 program
   .command('search <query>')
   .description('Search for web features')
-  .action((query) => {
-    const results = searchFeatures(query);
-    
-    if (results.length === 0) {
-      console.log(chalk.yellow(`\nNo features found matching "${query}"\n`));
-      return;
-    }
-    
-    console.log(chalk.bold(`\nFound ${results.length} features:\n`));
-    
-    results.slice(0, 20).forEach(feature => {
-      const statusIcon = getStatusIcon(feature.baseline);
-      console.log(`${statusIcon} ${chalk.cyan(feature.name)} ${chalk.gray(`(${feature.id})`)}`);
-      if (feature.description) {
-        console.log(chalk.gray(`  ${feature.description.slice(0, 100)}...`));
+  .action(async (query) => {
+    try {
+      const results = searchFeatures(query);
+      
+      if (results.length === 0) {
+        console.log(chalk.yellow(`\nNo features found matching "${query}"\n`));
+        simpleExit(0);
       }
-      console.log();
-    });
-    
-    if (results.length > 20) {
-      console.log(chalk.gray(`... and ${results.length - 20} more results\n`));
+      
+      console.log(chalk.bold(`\nFound ${results.length} features:\n`));
+      
+      results.slice(0, 20).forEach(feature => {
+        const statusIcon = getStatusIcon(feature.baseline);
+        console.log(`${statusIcon} ${chalk.cyan(feature.name)} ${chalk.gray(`(${feature.id})`)}`);
+        if (feature.description) {
+          console.log(chalk.gray(`  ${feature.description.slice(0, 100)}...`));
+        }
+        console.log();
+      });
+      
+      if (results.length > 20) {
+        console.log(chalk.gray(`... and ${results.length - 20} more results\n`));
+      }
+      
+      simpleExit(0);
+    } catch (error) {
+      console.error(chalk.red('Error searching features:'));
+      console.error(chalk.gray(formatError(error)));
+      simpleExit(1);
     }
   });
 
@@ -344,42 +367,50 @@ program
 program
   .command('info <featureId>')
   .description('Get detailed information about a feature')
-  .action((featureId) => {
-    const feature = getFeatureStatus(featureId);
-    
-    if (!feature) {
-      console.error(chalk.red(`Feature "${featureId}" not found`));
-      process.exit(1);
-    }
-    
-    const statusIcon = getStatusIcon(feature.baseline);
-    
-    console.log();
-    console.log(chalk.bold.cyan(feature.name));
-    console.log(chalk.gray('─'.repeat(50)));
-    console.log();
-    console.log(`${chalk.bold('Status:')} ${statusIcon} ${getStatusText(feature.baseline)}`);
-    console.log(`${chalk.bold('Group:')} ${feature.group}`);
-    
-    if (feature.baseline_low_date) {
-      console.log(`${chalk.bold('Newly Available Since:')} ${feature.baseline_low_date}`);
-    }
-    if (feature.baseline_high_date) {
-      console.log(`${chalk.bold('Widely Available Since:')} ${feature.baseline_high_date}`);
-    }
-    
-    console.log();
-    console.log(chalk.bold('Browser Support:'));
-    Object.entries(feature.support).forEach(([browser, version]) => {
-      console.log(`  ${browser.padEnd(18)} ${version}`);
-    });
-    
-    if (feature.description) {
+  .action(async (featureId) => {
+    try {
+      const feature = getFeatureStatus(featureId);
+      
+      if (!feature) {
+        console.error(chalk.red(`Feature "${featureId}" not found`));
+        await cleanupAndExit(1);
+      }
+      
+      const statusIcon = getStatusIcon(feature.baseline);
+      
       console.log();
-      console.log(chalk.bold('Description:'));
-      console.log(`  ${feature.description}`);
+      console.log(chalk.bold.cyan(feature.name));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log();
+      console.log(`${chalk.bold('Status:')} ${statusIcon} ${getStatusText(feature.baseline)}`);
+      console.log(`${chalk.bold('Group:')} ${feature.group}`);
+      
+      if (feature.baseline_low_date) {
+        console.log(`${chalk.bold('Newly Available Since:')} ${feature.baseline_low_date}`);
+      }
+      if (feature.baseline_high_date) {
+        console.log(`${chalk.bold('Widely Available Since:')} ${feature.baseline_high_date}`);
+      }
+      
+      console.log();
+      console.log(chalk.bold('Browser Support:'));
+      Object.entries(feature.support).forEach(([browser, version]) => {
+        console.log(`  ${browser.padEnd(18)} ${version}`);
+      });
+      
+      if (feature.description) {
+        console.log();
+        console.log(chalk.bold('Description:'));
+        console.log(`  ${feature.description}`);
+      }
+      console.log();
+      
+      simpleExit(0);
+    } catch (error) {
+      console.error(chalk.red('Error getting feature info:'));
+      console.error(chalk.gray(formatError(error)));
+      simpleExit(1);
     }
-    console.log();
   });
 
 /**
