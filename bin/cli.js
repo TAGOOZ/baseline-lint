@@ -10,20 +10,6 @@ import path from 'path';
 import fs from 'fs/promises';
 import { analyzeCSSFile, formatIssues } from '../src/parsers/css-parser.js';
 import { analyzeJSFile, formatJSIssues } from '../src/parsers/js-parser.js';
-
-/**
- * Clean up resources and exit
- */
-async function cleanupAndExit(code = 0) {
-  try {
-    await logger.close();
-    performanceMonitor.stop();
-    memoryMonitor.stop();
-  } catch (cleanupError) {
-    // Ignore cleanup errors during exit
-  }
-  process.exit(code);
-}
 import { 
   getFeaturesByStatus, 
   searchFeatures, 
@@ -44,6 +30,20 @@ import { loadConfig, getCommandConfig } from '../src/config/config.js';
 import { cleanupAllFileHandles } from '../src/utils/file-handler.js';
 import { performanceMonitor, fileAnalysisTracker, memoryMonitor } from '../src/utils/performance.js';
 import { logger } from '../src/utils/logger.js';
+
+/**
+ * Clean up resources and exit
+ */
+async function cleanupAndExit(code = 0) {
+  try {
+    await logger.close();
+    performanceMonitor.stop();
+    memoryMonitor.stop();
+  } catch (cleanupError) {
+    // Ignore cleanup errors during exit
+  }
+  process.exit(code);
+}
 
 const program = new Command();
 
