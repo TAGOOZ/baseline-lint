@@ -1,0 +1,50 @@
+{
+  "results": [
+    {
+      "file": "test-pr-files/test-component.css",
+      "issues": [
+        {
+          "line": 10,
+          "column": 3,
+          "property": "backdrop-filter",
+          "value": null,
+          "severity": "info",
+          "message": "Newly available (since 2024-09-16)",
+          "baseline": "low",
+          "support": {
+            "chrome": "76",
+            "edge": "79",
+            "firefox": "103",
+            "safari": "18"
+          },
+          "compatible": true
+        },
+        {
+          "line": 14,
+          "column": 3,
+          "property": "color-scheme",
+          "value": "light",
+          "severity": "warning",
+          "message": "Unknown Baseline status - API may not be widely supported",
+          "compatible": false
+        }
+      ],
+      "type": "css"
+    },
+    {
+      "file": "test-pr-files/test-component.js",
+      "issues": [
+        {
+          "line": 32,
+          "column": 18,
+          "api": "String.prototype.replaceAll",
+          "severity": "warning",
+          "message": "Unknown Baseline status - API may not be widely supported",
+          "compatible": false
+        }
+      ],
+      "type": "js"
+    }
+  ],
+  "score": 75
+}

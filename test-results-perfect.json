@@ -1,0 +1,10 @@
+{
+  "results": [
+    {
+      "file": "src/example.css",
+      "issues": [],
+      "type": "css"
+    }
+  ],
+  "score": 100
+}
