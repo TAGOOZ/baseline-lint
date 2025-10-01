@@ -1,0 +1,17 @@
+/* Final PR test for baseline compatibility */
+.test-final-pr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-feature-test {
+  container-type: inline-size;
+  aspect-ratio: 16/9;
+  backdrop-filter: blur(5px);
+}
+
+.experimental-feature {
+  color: oklch(50% 0.2 270);
+}
