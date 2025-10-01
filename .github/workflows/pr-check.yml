@@ -76,14 +76,12 @@ jobs:
           # Run baseline check with timeout
           echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
 
-          # Execute with timeout and capture output
-          RESULT=$(timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1 || echo '{"error": "baseline-lint failed or timed out"}')
-
-          echo "Baseline-lint execution completed"
-
-          # Check if result contains error
-          if echo "$RESULT" | grep -q '"error"'; then
-            echo "❌ baseline-lint failed or timed out"
+          # Execute with timeout and capture output properly
+          if timeout 30s bash -c "node bin/cli.js check $CHANGED_FILES --format json --score > /tmp/baseline-output.json 2>&1"; then
+            RESULT=$(cat /tmp/baseline-output.json)
+            echo "✅ baseline-lint completed successfully"
+          else
+            echo "❌ baseline-lint timed out or failed"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
@@ -102,6 +100,9 @@ jobs:
           # Extract score and issues with fallback values
           SCORE=$(echo "$RESULT" | jq -r '.score // 100')
           ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
+
+          # Clean up temporary file
+          rm -f /tmp/baseline-output.json
 
           echo "result=completed" >> $GITHUB_OUTPUT
           echo "score=$SCORE" >> $GITHUB_OUTPUT
