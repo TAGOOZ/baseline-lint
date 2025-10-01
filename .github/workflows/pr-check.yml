@@ -81,8 +81,8 @@ jobs:
           # Run baseline-lint with JSON output and capture results
           echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
           
-          # Run the command and capture both stdout and stderr
-          if node bin/cli.js check $CHANGED_FILES --format json --score > "$RESULTS_FILE" 2>&1; then
+          # Run the command with timeout and capture both stdout and stderr
+          if timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score > "$RESULTS_FILE" 2>&1; then
             echo "✅ baseline-lint completed successfully"
             
             # Parse results

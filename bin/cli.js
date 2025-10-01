@@ -8,8 +8,22 @@ import ora from 'ora';
 import { glob } from 'glob';
 import path from 'path';
 import fs from 'fs/promises';
-import { analyzeCSSFile, formatIssues } from '../src/parsers/css-parser.js';
-import { analyzeJSFile, formatJSIssues } from '../src/parsers/js-parser.js';
+import { analyzeCSSFile } from '../src/parsers/css-parser.js';
+import { analyzeJSFile } from '../src/parsers/js-parser.js';
+
+/**
+ * Clean up resources and exit
+ */
+async function cleanupAndExit(code = 0) {
+  try {
+    await logger.close();
+    performanceMonitor.stop();
+    memoryMonitor.stop();
+  } catch (cleanupError) {
+    // Ignore cleanup errors during exit
+  }
+  process.exit(code);
+}
 import { 
   getFeaturesByStatus, 
   searchFeatures, 
@@ -216,20 +230,20 @@ program
       
       if (options.failOnError && results.length > 0) {
         performanceMonitor.endOperation(operationId, false);
-        memoryMonitor.stop();
-        process.exit(1);
+        await cleanupAndExit(1);
       }
       
       // End performance monitoring
       performanceMonitor.endOperation(operationId, true);
-      memoryMonitor.stop();
+      
+      // Clean up all resources and exit
+      await cleanupAndExit(0);
       
     } catch (error) {
       performanceMonitor.endOperation(operationId, false, error);
-      memoryMonitor.stop();
       console.error(chalk.red('Error during check:'));
       console.error(chalk.gray(formatError(error)));
-      process.exit(1);
+      await cleanupAndExit(1);
     }
   });
 
