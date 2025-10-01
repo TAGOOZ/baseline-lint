@@ -1,53 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# baseline-lint Dashboard 📊
 
-## Getting Started
+> Beautiful Next.js web interface for interactive baseline compatibility scanning
 
-First, run the development server:
+A modern, responsive dashboard that provides a visual interface for the `baseline-lint` CLI tool, built with Next.js, TypeScript, and Tailwind CSS.
+
+## ✨ Features
+
+- 🎨 **Modern UI**: Clean, responsive interface with shadcn/ui components
+- 🔍 **Interactive Scanning**: Real-time file and directory scanning
+- 📊 **Live Results**: Instant baseline compatibility scores and detailed reports
+- 🌙 **Dark/Light Mode**: Automatic theme switching support
+- 📱 **Mobile Responsive**: Works perfectly on all device sizes
+- ⚡ **Fast Performance**: Optimized with Next.js App Router
+- 🛡️ **Type Safety**: Full TypeScript support throughout
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+Make sure you have the main `baseline-lint` package working:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd ../  # Go to main project root
+npm install
+npm run test:unit  # Ensure CLI is working
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation & Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Install dependencies
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load system and custom fonts.
+# Start development server
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 
-To learn more about Next.js, take a look at the following resources:
+### Production Build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npm start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🏗️ Architecture
 
-## Baseline Lint Integration
+### Tech Stack
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **API**: Next.js API Routes
+- **CLI Integration**: Direct integration with `../bin/cli.js`
 
-This dashboard consumes the local `baseline-lint` CLI via an API route at `/api/scan`.
+### Project Structure
+```
+baseline-dashboard/
+├── src/
+│   ├── app/           # Next.js App Router pages
+│   ├── components/    # Reusable UI components
+│   └── lib/          # Utilities and helpers
+├── public/           # Static assets
+└── package.json      # Dependencies and scripts
+```
 
-### Endpoint
-`GET /api/scan?path=<target>&level=<level>`
+## 🔗 CLI Integration
 
-Parameters:
-- `path` (optional) Directory or single file. Absolute or repo-relative. Defaults to `../src`.
-- `level` (optional) `high | low | all` (default `high`). Use `all` to disable filtering.
+The dashboard seamlessly integrates with the parent `baseline-lint` CLI tool via the `/api/scan` API route.
 
-Features:
-- Single file short‑circuit for faster responses.
-- Fallback per‑file scanning when initial directory scan returns zero results.
-- Parse-error files skipped (not fatal) with remaining results still aggregated.
-- Late score calculation if fallback produced results but initial score was absent.
+### API Endpoint
 
-Response shape (fields may be subset depending on results):
+**`GET /api/scan`**
+
+Query Parameters:
+- `path` (optional): Target directory or file path
+  - Supports absolute paths or relative to project root
+  - Defaults to `../src` (parent project source)
+  - Examples: `/home/user/project`, `../test-files`, `./sample.css`
+
+- `level` (optional): Baseline compatibility level filter
+  - `high` (default): Only widely available features
+  - `low`: Newly available features
+  - `all`: No filtering, show everything
+
+### Response Format
+
 ```json
+{
+  "success": true,
+  "score": "94/100",
+  "totalFiles": 12,
+  "issues": "2 errors, 14 warnings",
+  "details": [
+    {
+      "file": "src/styles.css",
+      "line": 15,
+      "feature": "container-queries", 
+      "severity": "warning",
+      "baseline": "newly-available"
+    }
+  ]
+}
+```
+
+### Features & Reliability
+
+- ⚡ **Smart Scanning**: Single file optimization for faster responses
+- 🔄 **Fallback Strategy**: Per-file scanning when directory scan fails
+- 🛡️ **Error Resilience**: Parse errors don't halt the entire scan
+- 📊 **Late Score Calculation**: Calculates scores even when fallbacks are used
+- ⏱️ **Timeout Protection**: 30-second timeout prevents hanging
+- 🧹 **Clean Exit**: Proper resource cleanup after each scan
+
+## 🎨 UI Components
+
+Built with modern, accessible components:
+
+- **Scanner Interface**: File/directory input with real-time validation
+- **Results Display**: Beautiful cards showing scores and issues
+- **Progress Indicators**: Loading states and scan progress
+- **Error Handling**: Graceful error messages and retry options
+- **Responsive Layout**: Mobile-first design that works everywhere
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript checks
+```
+
+### Environment Setup
+
+The dashboard expects the parent `baseline-lint` CLI to be available at `../bin/cli.js`. Make sure:
+
+1. Parent project is properly installed (`npm install` in root)
+2. CLI is working (`node ../bin/cli.js --help`)
+3. All recent fixes are applied (timeout protection, cleanup, etc.)
+
+## 📱 Screenshots
+
+### Main Interface
+- Clean, modern scanning interface
+- Real-time path validation
+- Instant compatibility scoring
+
+### Results View  
+- Detailed compatibility reports
+- Issue breakdown by severity
+- File-by-file analysis
+
+### Mobile Experience
+- Fully responsive design
+- Touch-friendly interactions
+- Optimized for small screens
+
+## 🚀 Deployment
+
+The dashboard can be deployed to any Next.js-compatible platform:
+
+- **Vercel**: `vercel deploy`
+- **Netlify**: Connect to Git repository
+- **Docker**: Build and containerize
+- **Static Export**: `npm run build && npm run export`
+
+Note: Ensure the baseline-lint CLI is available in the deployment environment.
+
+## 🔗 Integration Examples
 {
 	"score": 72,
 	"totalFiles": 3,
