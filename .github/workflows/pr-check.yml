@@ -37,7 +37,7 @@ jobs:
         run: npm run build
 
       - name: Install baseline-lint globally
-        run: npm install -g .
+        run: npm install -g baseline-lint@latest
 
       - name: Run baseline check
         id: baseline-check

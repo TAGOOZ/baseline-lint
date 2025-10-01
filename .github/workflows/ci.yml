@@ -251,7 +251,7 @@ jobs:
         run: npm ci
 
       - name: Install baseline-lint globally
-        run: npm install -g .
+        run: npm install -g baseline-lint@latest
 
       - name: Check baseline-lint against itself
         run: |
