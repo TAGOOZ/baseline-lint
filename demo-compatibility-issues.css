@@ -1,0 +1,28 @@
+/* Test file to demonstrate improved PR comments */
+
+.modern-features {
+  /* 🔴 Critical: Limited browser support */
+  word-break: auto-phrase; /* Only Chrome 119+ */
+  
+  /* 🟡 Warning: Newly available features */
+  container-type: inline-size; /* Since 2023-02 */
+  aspect-ratio: 16/9; /* Since 2021-03 */
+  
+  /* ✅ Good: Widely supported */
+  display: flex;
+  justify-content: center;
+}
+
+.experimental {
+  /* 🔴 Critical: Very limited support */
+  backdrop-filter: blur(10px); /* Needs -webkit- prefix */
+  
+  /* 🟡 Warning: Container queries */
+  container-name: sidebar;
+}
+
+@container sidebar (min-width: 300px) {
+  .responsive-text {
+    font-size: 1.2rem;
+  }
+}
