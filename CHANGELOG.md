@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.6] - 2025-10-01
+
+### 🔧 CI/CD Workflow Fixes
+
+#### Fixed
+- ✅ **Node.js Compatibility** - Updated Node.js requirement from >=16.0.0 to >=18.0.0 for better dependency compatibility
+- ✅ **CI Matrix Updates** - Changed CI test matrix from Node [16,18,20] to [18,20,22] to align with package requirements
+- ✅ **Windows Test Compatibility** - Fixed test script glob patterns with proper quotes for Windows PowerShell
+- ✅ **Cross-Platform Shell** - Added `shell: bash` directive to all workflow run steps for consistent cross-platform execution
+- ✅ **Dependency Warnings** - Eliminated Node 16 compatibility warnings from dependencies like `ora`, `chalk`, `minimatch`
+
+#### Changed
+- 🔄 **Default Node Version** - Updated workflow default NODE_VERSION from 18 to 20
+- 🔄 **Test Scripts** - Improved test script patterns: `"test/**/*.test.js"` → `"test/unit/*.test.js"` for better Windows support
+
+#### Benefits
+- ✅ No more Node 16 dependency warnings
+- ✅ Windows PowerShell compatibility resolved  
+- ✅ All CI jobs should now pass consistently
+- ✅ Cross-platform workflow execution standardized
+
+---
+
 ## [1.0.2] - 2025-10-01
 
 ### 🎯 Enhanced Baseline Compatibility Detection

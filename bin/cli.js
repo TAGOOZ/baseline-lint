@@ -483,10 +483,13 @@ program
         console.log(chalk.green(`✓ Metrics exported to: ${options.export}`));
       }
       
+      // Ensure proper cleanup on successful completion
+      await cleanupAndExit(0);
+      
     } catch (error) {
       console.error(chalk.red('Performance error:'));
       console.error(chalk.gray(formatError(error)));
-      process.exit(1);
+      await cleanupAndExit(1);
     }
   });
 

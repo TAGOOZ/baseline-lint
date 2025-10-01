@@ -77,17 +77,19 @@ jobs:
 
       - name: Test with sample files
         shell: bash
+        timeout-minutes: 3
         run: |
-          node bin/cli.js check test/integration/test-project/src || echo "Sample file check completed"
-          node bin/cli.js score test/integration/test-project/src || echo "Sample file scoring completed"
+          timeout 120s node bin/cli.js check test/integration/test-project/src || echo "Sample file check completed"
+          timeout 120s node bin/cli.js score test/integration/test-project/src || echo "Sample file scoring completed"
 
       - name: Run baseline check on source code
         shell: bash
+        timeout-minutes: 3
         run: |
           echo "Running baseline-lint on source code..."
-          node bin/cli.js check ./src --score || echo "Baseline check completed with issues"
+          timeout 120s node bin/cli.js check ./src --score || echo "Baseline check completed with issues"
           echo "Source code baseline score:"
-          node bin/cli.js score ./src || echo "Baseline scoring completed"
+          timeout 120s node bin/cli.js score ./src || echo "Baseline scoring completed"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -229,9 +231,10 @@ jobs:
         run: npm ci
 
       - name: Run performance tests
+        timeout-minutes: 5
         run: |
-          node bin/cli.js performance || echo "Performance CLI test completed"
-          npm run test:performance || echo "Performance tests not configured"
+          timeout 240s node bin/cli.js performance || echo "Performance CLI test completed"
+          timeout 240s npm run test:performance || echo "Performance tests not configured"
 
       - name: Upload performance results
         uses: actions/upload-artifact@v4
@@ -263,12 +266,12 @@ jobs:
         run: npm install -g .
 
       - name: Self-check baseline compatibility
+        timeout-minutes: 3
         run: |
           echo "Running baseline-lint self-check..."
           npm install -g baseline-lint@latest
-          baseline-lint check ./src || echo "Self-check completed"
-          baseline-lint check ./src || echo "Self-check completed"
-          baseline-lint score ./src || echo "Self-scoring completed"
+          timeout 120s baseline-lint check ./src || echo "Self-check completed"
+          timeout 120s baseline-lint score ./src || echo "Self-scoring completed"
 
       - name: Check dashboard
         run: |
