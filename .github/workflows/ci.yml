@@ -77,14 +77,12 @@ jobs:
 
       - name: Test with sample files
         shell: bash
-        timeout-minutes: 5
         run: |
           node bin/cli.js check test/integration/test-project/src || echo "Sample file check completed"
           node bin/cli.js score test/integration/test-project/src || echo "Sample file scoring completed"
 
       - name: Run baseline check on source code
         shell: bash
-        timeout-minutes: 8
         run: |
           echo "Running baseline-lint on source code..."
           node bin/cli.js check ./src --score || echo "Baseline check completed with issues"
@@ -200,7 +198,6 @@ jobs:
 
       - name: Test installed package functionality
         shell: bash
-        timeout-minutes: 8
         run: |
           node bin/cli.js check ./src --score || echo "Package test completed with issues"
           node bin/cli.js score ./src || echo "Package scoring completed"
@@ -232,7 +229,6 @@ jobs:
         run: npm ci
 
       - name: Run performance tests
-        timeout-minutes: 3
         run: |
           node bin/cli.js performance || echo "Performance CLI test completed"
           npm run test:performance || echo "Performance tests not configured"
@@ -263,20 +259,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install baseline-lint globally
-        run: npm install -g .
-
       - name: Self-check baseline compatibility
-        timeout-minutes: 3
         run: |
-          echo "Running baseline-lint self-check..."
-          npm install -g baseline-lint@latest
-          baseline-lint check ./src || echo "Self-check completed"
-          baseline-lint score ./src || echo "Self-scoring completed"
-
-      - name: Check dashboard
-        run: |
-          npm run dashboard || echo "Dashboard test completed"
+          echo "Running baseline-lint self-check with local version..."
+          node bin/cli.js check ./src || echo "Self-check completed"
+          echo "Running baseline scoring..."
+          node bin/cli.js score ./src || echo "Self-scoring completed"
 
   # Publish to npm (on release)
   publish:

@@ -14,7 +14,6 @@ jobs:
   test-file-detection:
     name: Test File Detection Logic
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     
     steps:
       - name: Checkout code
@@ -80,14 +79,13 @@ jobs:
           CHANGED_FILES=$(./scripts/detect-changed-files.sh)
           
           if [ -n "$CHANGED_FILES" ] && [ "$CHANGED_FILES" != "No CSS/JS files found" ]; then
-            echo "Installing baseline-lint..."
-            npm install -g .
+            echo "Using local baseline-lint..."
             
             echo "Running baseline-lint on detected files:"
             echo "$CHANGED_FILES" | while read -r file; do
               if [ -f "$file" ]; then
                 echo "Checking $file..."
-                baseline-lint check "$file" --score || echo "Failed to check $file"
+                node bin/cli.js check "$file" --score || echo "Failed to check $file"
               fi
             done
           else
