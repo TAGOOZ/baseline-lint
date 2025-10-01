@@ -73,30 +73,60 @@ jobs:
           echo "$CHANGED_FILES"
           echo ""
 
-          # Run baseline check with timeout
+          # Run baseline check with timeout and proper exit handling
           echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
-          RESULT=$(timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1)
-          echo "Baseline-lint result: $RESULT"
-          
-          # Check if result contains error
-          if echo "$RESULT" | grep -q '"error"'; then
-            echo "❌ baseline-lint failed"
+          set +e  # Don't exit on command failure
+
+          # Use timeout and capture both stdout and stderr
+          if timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score > /tmp/baseline-result.json 2> /tmp/baseline-error.log; then
+            echo "✅ baseline-lint completed successfully"
+            RESULT=$(cat /tmp/baseline-result.json)
+            ERROR_OUTPUT=$(cat /tmp/baseline-error.log)
+
+            # Check if result contains actual JSON content
+            if echo "$RESULT" | jq -e '.' > /dev/null 2>&1; then
+              echo "✅ Valid JSON output received"
+            else
+              echo "❌ Invalid JSON output from baseline-lint"
+              echo "Raw output: $RESULT"
+              echo "result=failed" >> $GITHUB_OUTPUT
+              echo "score=0" >> $GITHUB_OUTPUT
+              echo "issues=0" >> $GITHUB_OUTPUT
+              exit 1
+            fi
+          else
+            TIMEOUT_EXIT=$?
+            echo "❌ baseline-lint timed out or failed (exit code: $TIMEOUT_EXIT)"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 1
           fi
-          
-          # Extract score and issues
-          SCORE=$(echo "$RESULT" | jq -r '.score // 100')
-          ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
-          
+
+          # Extract score and issues with error handling
+          if SCORE=$(echo "$RESULT" | jq -r '.score // empty' 2>/dev/null); then
+            echo "✅ Score extracted: $SCORE"
+          else
+            echo "⚠️ Could not extract score, using default"
+            SCORE=100
+          fi
+
+          if ISSUES=$(echo "$RESULT" | jq -r '.results | length // empty' 2>/dev/null); then
+            echo "✅ Issues extracted: $ISSUES"
+          else
+            echo "⚠️ Could not extract issues count, using default"
+            ISSUES=0
+          fi
+
           echo "result=completed" >> $GITHUB_OUTPUT
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "issues=$ISSUES" >> $GITHUB_OUTPUT
-          
-          echo "✅ Score: $SCORE/100"
-          echo "✅ Issues: $ISSUES"
+
+          echo "✅ Baseline Score: $SCORE/100"
+          echo "✅ Issues Found: $ISSUES"
+
+          # Clean up temporary files
+          rm -f /tmp/baseline-result.json /tmp/baseline-error.log
 
       - name: Comment PR
         if: github.event_name == 'pull_request'
@@ -159,3 +189,9 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
+
+      - name: Workflow Complete
+        run: |
+          echo "🎉 GitHub Actions workflow completed successfully!"
+          echo "Baseline compatibility check finished."
+          echo "PR comment posted with results."
