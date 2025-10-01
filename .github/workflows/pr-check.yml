@@ -30,23 +30,53 @@ jobs:
         id: baseline-check
         run: |
           echo "=== Running Baseline Check ==="
-          
-          # Find CSS/JS files in the PR
-          CHANGED_FILES=$(find . -name "*.css" -o -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -5)
-          
+
+          # Get changed files from the PR
+          CHANGED_FILES=""
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Using PR context to find changed files..."
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+            if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
+              echo "Comparing $BASE_SHA..$HEAD_SHA"
+              CHANGED_FILES=$(git diff --name-only --diff-filter=AM $BASE_SHA $HEAD_SHA | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+              echo "Found files: $CHANGED_FILES"
+            fi
+          fi
+
+          # Fallback: check files in current commit
           if [ -z "$CHANGED_FILES" ]; then
-            echo "No CSS/JS files found"
+            echo "Fallback: Checking files in current commit..."
+            CHANGED_FILES=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD 2>/dev/null | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
+            echo "Found files: $CHANGED_FILES"
+          fi
+
+          # Final fallback: check all CSS/JS files in repository
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "Final fallback: Checking all CSS/JS files..."
+            CHANGED_FILES=$(find . -name "*.css" -o -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -3)
+            echo "Found files: $CHANGED_FILES"
+          fi
+
+          # Check if no files found
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "=== No CSS/JS Files Found ==="
             echo "result=no-changes" >> $GITHUB_OUTPUT
             echo "score=100" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
-          echo "Files to check: $CHANGED_FILES"
-          
+
+          echo "=== Files to check: ==="
+          echo "$CHANGED_FILES"
+          echo ""
+
           # Run baseline check with timeout
+          echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
           RESULT=$(timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1)
-          echo "Result: $RESULT"
+          echo "Baseline-lint result: $RESULT"
           
           # Check if result contains error
           if echo "$RESULT" | grep -q '"error"'; then
