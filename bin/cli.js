@@ -50,7 +50,7 @@ const program = new Command();
 program
   .name('baseline-lint')
   .description('Check web features for Baseline compatibility')
-  .version('1.0.1');
+  .version('1.0.2');
 
 /**
  * Main check command
@@ -691,4 +691,5 @@ function getStatusText(baseline) {
   return chalk.red('Limited Availability');
 }
 
-program.parse();
+// Use async parsing to ensure Commander waits for async actions to finish
+await program.parseAsync();

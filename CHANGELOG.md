@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ **Improved BCD Integration** - Enhanced Browser Compatibility Data integration with intelligent fallback strategies
 - ✅ **Better Accuracy** - Added comprehensive fallback mappings for common features like `flex-direction`, `justify-content`, `align-items`, `background-color`, `console`, `Promise`, `Symbol`, etc.
 - ✅ **Reduced False Warnings** - Significantly reduced false "Unknown Baseline status" warnings while maintaining accuracy
+- ✅ **CLI Hang / Workflow Exit** - Added graceful shutdown: implemented `PerformanceMonitor.stop()`, switched to `program.parseAsync()`, ensured timers (memory + logger flush) are cleared so CI workflows proceed to next phase without hanging
 
 #### Added
 - ✅ **CSS Fallback Mappings** - Added fallback data for 15+ common CSS properties

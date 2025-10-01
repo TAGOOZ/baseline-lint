@@ -321,6 +321,7 @@ export class PerformanceMonitor {
   constructor(metrics = null) {
     this.metrics = metrics || new PerformanceMetrics();
     this.activeOperations = new Map();
+  this.stopped = false;
   }
 
   /**
@@ -414,6 +415,25 @@ export class PerformanceMonitor {
     const summary = this.metrics.getSummary();
     summary.activeOperations = this.activeOperations.size;
     return summary;
+  }
+
+  /**
+   * Stop the performance monitor, marking any active operations as incomplete
+   * and preventing new ones from being started.
+   */
+  stop() {
+    if (this.stopped) return;
+    // Mark any outstanding operations as aborted
+    for (const [opId] of this.activeOperations) {
+      try {
+        this.endOperation(opId, false, new Error('Operation aborted: monitor stopped'));
+      } catch (_) {
+        // ignore
+      }
+    }
+    this.activeOperations.clear();
+    this.stopped = true;
+    logger.debug('Performance monitor stopped');
   }
 }
 
