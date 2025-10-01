@@ -282,8 +282,40 @@ function main() {
   
   try {
     // Read and parse results
-    const resultsContent = readFileSync(resultsFile, 'utf-8');
-    const data = JSON.parse(resultsContent);
+    let resultsContent = readFileSync(resultsFile, 'utf-8');
+    
+    // Clean up potential non-JSON content at the beginning
+    const jsonStart = resultsContent.indexOf('{');
+    if (jsonStart > 0) {
+      resultsContent = resultsContent.substring(jsonStart);
+    }
+    
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(resultsContent);
+    } catch (parseError) {
+      // If JSON parsing fails, try to extract JSON from mixed content
+      const lines = resultsContent.split('\n');
+      let jsonLines = [];
+      let inJson = false;
+      
+      for (const line of lines) {
+        if (line.trim().startsWith('{') || inJson) {
+          inJson = true;
+          jsonLines.push(line);
+        }
+        if (line.trim() === '}' && inJson) {
+          break;
+        }
+      }
+      
+      if (jsonLines.length > 0) {
+        data = JSON.parse(jsonLines.join('\n'));
+      } else {
+        throw new Error(`Unable to parse JSON from results file: ${parseError.message}`);
+      }
+    }
     
     if (!data.results || !Array.isArray(data.results)) {
       throw new Error('Invalid results format: missing results array');

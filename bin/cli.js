@@ -95,7 +95,10 @@ program
       // Validate input
       validateCLIInput('check', paths, finalConfig);
       
-      const spinner = ora('Scanning files...').start();
+      // Only show spinner in text format
+      const spinner = options.format === 'json' ? 
+        { text: '', start: () => {}, stop: () => {} } : 
+        ora('Scanning files...').start();
       
       if (!paths || paths.length === 0) {
         paths = ['./src', './styles', './*.css', './*.js'];

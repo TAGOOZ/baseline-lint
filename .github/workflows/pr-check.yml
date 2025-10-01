@@ -84,8 +84,14 @@ jobs:
           # Run baseline-lint with JSON output and capture results
           echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
           
-          # Run with timeout and force completion even if hangs (|| true handles Ctrl+C like behavior)
-          timeout 30s baseline-lint check $CHANGED_FILES --format json --score > "$RESULTS_FILE" 2>&1 || true
+          # Run with timeout and force completion, suppress stderr to avoid JSON pollution
+          timeout 30s baseline-lint check $CHANGED_FILES --format json --score 2>/dev/null > "$RESULTS_FILE" || true
+          
+          # If JSON file is empty or invalid, try without score flag
+          if [ ! -s "$RESULTS_FILE" ] || ! jq empty "$RESULTS_FILE" 2>/dev/null; then
+            echo "Retrying without --score flag..."
+            timeout 30s baseline-lint check $CHANGED_FILES --format json 2>/dev/null > "$RESULTS_FILE" || true
+          fi
           
           # Always continue to next step
           echo "✅ baseline-lint execution completed"
@@ -163,13 +169,19 @@ jobs:
             # Make the script executable and run it
             chmod +x scripts/generate-pr-comment.js
             
+            echo "Debugging: Results file content:"
+            cat "$RESULTS_FILE" | head -10
+            echo "---"
+            
             if node scripts/generate-pr-comment.js "$RESULTS_FILE" \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              > /tmp/pr-comment.md; then
+              > /tmp/pr-comment.md 2>/tmp/comment-error.log; then
               echo "✅ Detailed comment generated successfully"
             else
-              echo "❌ Failed to generate detailed comment, falling back to basic comment"
+              echo "❌ Failed to generate detailed comment, error log:"
+              cat /tmp/comment-error.log
+              echo "Falling back to basic comment"
               # Fallback to basic comment
               cat > /tmp/pr-comment.md << EOF
           ## 🎯 Baseline Compatibility Report
