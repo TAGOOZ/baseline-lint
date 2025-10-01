@@ -1,4 +1,4 @@
-name: PR Baseline Check (Fixed)
+name: PR Baseline Check (FIXED)
 
 on:
   pull_request:
@@ -38,19 +38,15 @@ jobs:
           echo "Building baseline-lint package..."
           npm run build || echo "Build step skipped (not required)"
 
-      - name: Install baseline-lint globally
-        run: npm install -g .
-
       - name: Run baseline check
         id: baseline-check
         run: |
           echo "=== Starting Baseline Check ==="
           
           # Test baseline-lint installation
-          echo "Testing baseline-lint installation:"
-          which baseline-lint || echo "baseline-lint not found in PATH"
-          baseline-lint --version || {
-            echo "❌ baseline-lint version check failed"
+          echo "Testing baseline-lint CLI..."
+          node bin/cli.js --version || {
+            echo "❌ baseline-lint CLI test failed"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
@@ -96,11 +92,11 @@ jobs:
           echo "=== Running Baseline Check ==="
           echo "Files to check: $CHANGED_FILES"
           
-          # Run baseline check with timeout
-          echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
+          # Run baseline check with timeout using node directly
+          echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
           
           # Use timeout to prevent hanging
-          RESULT=$(timeout 60s baseline-lint check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint timed out or failed\"}")
+          RESULT=$(timeout 60s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint timed out or failed\"}")
           echo "Baseline-lint result: $RESULT"
           
           # Check if the result contains an error
