@@ -1,4 +1,4 @@
-name: PR Baseline Check (FIXED)
+name: PR Baseline Check
 
 on:
   pull_request:
@@ -7,108 +7,57 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  issues: write
-
-env:
-  NODE_VERSION: '18'
 
 jobs:
   baseline-check:
     name: Baseline Compatibility Check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          node-version: '18'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build package
-        run: |
-          echo "Building baseline-lint package..."
-          npm run build || echo "Build step skipped (not required)"
-
       - name: Run baseline check
         id: baseline-check
         run: |
-          echo "=== Starting Baseline Check ==="
+          echo "=== Running Baseline Check ==="
           
-          # Test baseline-lint installation
-          echo "Testing baseline-lint CLI..."
-          node bin/cli.js --version || {
-            echo "❌ baseline-lint CLI test failed"
-            echo "result=failed" >> $GITHUB_OUTPUT
-            echo "score=0" >> $GITHUB_OUTPUT
-            echo "issues=0" >> $GITHUB_OUTPUT
-            exit 1
-          }
+          # Find CSS/JS files in the PR
+          CHANGED_FILES=$(find . -name "*.css" -o -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -5)
           
-          # Find changed files using a simpler approach
-          echo "=== Finding Changed Files ==="
-          
-          # Get changed files from the PR
-          CHANGED_FILES=""
-          
-          # Try to get files from PR context first
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "Using PR context to find changed files..."
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            
-            if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
-              echo "Comparing $BASE_SHA..$HEAD_SHA"
-              CHANGED_FILES=$(git diff --name-only --diff-filter=AM $BASE_SHA $HEAD_SHA | grep -E '\.(css|js|jsx|ts|tsx)$' || echo "")
-              echo "Found files: $CHANGED_FILES"
-            fi
-          fi
-          
-          # Fallback: check all CSS/JS files in current commit
           if [ -z "$CHANGED_FILES" ]; then
-            echo "Fallback: Checking all CSS/JS files in current commit..."
-            CHANGED_FILES=$(find . -name "*.css" -o -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | grep -v node_modules | head -10)
-            echo "Found files: $CHANGED_FILES"
-          fi
-          
-          # Final check
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "=== No CSS/JS Files Found ==="
-            echo "No CSS/JS files found to check"
+            echo "No CSS/JS files found"
             echo "result=no-changes" >> $GITHUB_OUTPUT
             echo "score=100" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          echo "=== Running Baseline Check ==="
           echo "Files to check: $CHANGED_FILES"
           
-          # Run baseline check with timeout using node directly
-          echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
+          # Run baseline check with timeout
+          RESULT=$(timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1)
+          echo "Result: $RESULT"
           
-          # Use timeout to prevent hanging
-          RESULT=$(timeout 60s node bin/cli.js check $CHANGED_FILES --format json --score 2>&1 || echo "{\"error\": \"baseline-lint timed out or failed\"}")
-          echo "Baseline-lint result: $RESULT"
-          
-          # Check if the result contains an error
+          # Check if result contains error
           if echo "$RESULT" | grep -q '"error"'; then
-            echo "❌ baseline-lint execution failed or timed out"
+            echo "❌ baseline-lint failed"
             echo "result=failed" >> $GITHUB_OUTPUT
             echo "score=0" >> $GITHUB_OUTPUT
             echo "issues=0" >> $GITHUB_OUTPUT
             exit 1
           fi
           
-          # Extract score and issues count
+          # Extract score and issues
           SCORE=$(echo "$RESULT" | jq -r '.score // 100')
           ISSUES=$(echo "$RESULT" | jq -r '.results | length // 0')
           
@@ -116,8 +65,8 @@ jobs:
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "issues=$ISSUES" >> $GITHUB_OUTPUT
           
-          echo "✅ Baseline Score: $SCORE/100"
-          echo "✅ Issues Found: $ISSUES"
+          echo "✅ Score: $SCORE/100"
+          echo "✅ Issues: $ISSUES"
 
       - name: Comment PR
         if: always()
@@ -152,10 +101,9 @@ jobs:
               
               if (issuesNum > 0) {
                 comment += '**Recommendations:**\n';
-                comment += '- Consider using widely supported features (baseline: high)\n';
+                comment += '- Use widely supported features (baseline: high)\n';
                 comment += '- Add fallbacks for newly available features (baseline: low)\n';
                 comment += '- Review limited availability features (baseline: false)\n\n';
-                comment += '**View detailed results:** Check the workflow logs for specific file issues.\n\n';
               } else {
                 comment += '🎯 **Perfect! No baseline compatibility issues found.**\n\n';
               }
