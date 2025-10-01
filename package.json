@@ -1,6 +1,6 @@
 {
   "name": "baseline-lint",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Check web features for Baseline compatibility",
   "main": "src/index.js",
   "type": "module",
