@@ -8,8 +8,8 @@ import ora from 'ora';
 import { glob } from 'glob';
 import path from 'path';
 import fs from 'fs/promises';
-import { analyzeCSSFile } from '../src/parsers/css-parser.js';
-import { analyzeJSFile } from '../src/parsers/js-parser.js';
+import { analyzeCSSFile, formatIssues } from '../src/parsers/css-parser.js';
+import { analyzeJSFile, formatJSIssues } from '../src/parsers/js-parser.js';
 
 /**
  * Clean up resources and exit
@@ -43,6 +43,7 @@ import { formatError } from '../src/utils/error-handler.js';
 import { loadConfig, getCommandConfig } from '../src/config/config.js';
 import { cleanupAllFileHandles } from '../src/utils/file-handler.js';
 import { performanceMonitor, fileAnalysisTracker, memoryMonitor } from '../src/utils/performance.js';
+import { logger } from '../src/utils/logger.js';
 
 const program = new Command();
 
