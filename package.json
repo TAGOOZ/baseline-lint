@@ -1,6 +1,6 @@
 {
   "name": "baseline-lint",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Check web features for Baseline compatibility",
   "main": "src/index.js",
   "type": "module",
@@ -8,10 +8,10 @@
     "baseline-lint": "./bin/cli.js"
   },
   "scripts": {
-    "test": "node --test",
-    "test:unit": "node --test test/**/*.test.js",
-    "test:integration": "node --test test/integration/**/*.test.js",
-    "test:all": "node --test test/**/*.test.js test/integration/**/*.test.js",
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:unit": "node --test \"test/unit/*.test.js\"",
+    "test:integration": "node --test \"test/integration/**/*.test.js\"",
+    "test:all": "node --test \"test/**/*.test.js\"",
     "baseline-check": "node bin/cli.js check ./src --score",
     "baseline-score": "node bin/cli.js score ./src",
     "test:performance": "node bin/cli.js performance --export performance-results.json",
@@ -72,7 +72,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=8.0.0"
   }
 }

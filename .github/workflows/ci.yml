@@ -14,7 +14,7 @@ permissions:
   issues: write
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   NPM_CACHE_DIR: ~/.npm
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['16', '18', '20']
+        node-version: ['18', '20', '22']
     
     steps:
       - name: Checkout code
@@ -42,6 +42,7 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
+        shell: bash
         run: |
           echo "Running unit tests..."
           npm run test:unit || {
@@ -50,6 +51,7 @@ jobs:
           }
 
       - name: Run integration tests
+        shell: bash
         run: |
           echo "Running integration tests..."
           npm run test:integration || {
@@ -58,6 +60,7 @@ jobs:
           }
 
       - name: Run all tests
+        shell: bash
         run: |
           echo "Running all tests..."
           npm run test:all || {
@@ -66,17 +69,20 @@ jobs:
           }
 
       - name: Test CLI functionality
+        shell: bash
         run: |
           chmod +x bin/cli.js || echo "chmod not needed on Windows"
           node bin/cli.js --help || echo "CLI help test completed"
           node bin/cli.js check --help || echo "CLI check help test completed"
 
       - name: Test with sample files
+        shell: bash
         run: |
           node bin/cli.js check test/integration/test-project/src || echo "Sample file check completed"
           node bin/cli.js score test/integration/test-project/src || echo "Sample file scoring completed"
 
       - name: Run baseline check on source code
+        shell: bash
         run: |
           echo "Running baseline-lint on source code..."
           node bin/cli.js check ./src --score || echo "Baseline check completed with issues"
@@ -113,6 +119,7 @@ jobs:
         run: npm ci
 
       - name: Check code formatting
+        shell: bash
         run: |
           echo "Running lint check..."
           npm run lint:check || {
@@ -176,12 +183,14 @@ jobs:
         run: npm ci
 
       - name: Build package
+        shell: bash
         run: |
           echo "Building baseline-lint package..."
           npm run build || echo "TypeScript build completed"
           echo "Build completed successfully"
 
       - name: Test package installation
+        shell: bash
         run: |
           npm pack
           npm install -g baseline-lint-*.tgz || echo "Global install completed"
