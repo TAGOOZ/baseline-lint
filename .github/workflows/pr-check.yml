@@ -3,8 +3,6 @@ name: PR Baseline Check
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches: [test-workflow-final]
 
 permissions:
   contents: read
