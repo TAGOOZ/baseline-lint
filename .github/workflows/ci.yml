@@ -253,10 +253,13 @@ jobs:
       - name: Install baseline-lint globally
         run: npm install -g .
 
-      - name: Check baseline-lint against itself
+      - name: Self-check baseline compatibility
         run: |
-          node bin/cli.js check ./src || echo "Self-check completed"
-          node bin/cli.js score ./src || echo "Self-scoring completed"
+          echo "Running baseline-lint self-check..."
+          npm install -g baseline-lint@latest
+          baseline-lint check ./src || echo "Self-check completed"
+          baseline-lint check ./src || echo "Self-check completed"
+          baseline-lint score ./src || echo "Self-scoring completed"
 
       - name: Check dashboard
         run: |

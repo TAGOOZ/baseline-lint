@@ -78,11 +78,14 @@ jobs:
           RESULTS_FILE="/tmp/baseline-results-${{ github.run_id }}.json"
           echo "Results will be saved to: $RESULTS_FILE"
 
+          # Install latest baseline-lint from npm
+          npm install -g baseline-lint@latest
+          
           # Run baseline-lint with JSON output and capture results
-          echo "Running: node bin/cli.js check $CHANGED_FILES --format json --score"
+          echo "Running: baseline-lint check $CHANGED_FILES --format json --score"
           
           # Run with timeout and force completion even if hangs (|| true handles Ctrl+C like behavior)
-          timeout 30s node bin/cli.js check $CHANGED_FILES --format json --score > "$RESULTS_FILE" 2>&1 || true
+          timeout 30s baseline-lint check $CHANGED_FILES --format json --score > "$RESULTS_FILE" 2>&1 || true
           
           # Always continue to next step
           echo "✅ baseline-lint execution completed"
