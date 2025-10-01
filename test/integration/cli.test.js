@@ -9,18 +9,27 @@ describe('CLI Integration Tests', () => {
     const cliPath = path.join(process.cwd(), 'bin', 'cli.js');
     const child = spawn('node', [cliPath, '--help']);
     
+    // Add timeout protection
+    const timeout = setTimeout(() => {
+      child.kill('SIGKILL');
+      assert.fail('Test timed out after 10 seconds');
+      done();
+    }, 10000);
+    
     let output = '';
     child.stdout.on('data', (data) => {
       output += data.toString();
     });
     
     child.on('close', (code) => {
+      clearTimeout(timeout);
       assert.strictEqual(code, 0);
       assert(output.includes('Check web features for Baseline compatibility'));
       done();
     });
     
     child.on('error', (error) => {
+      clearTimeout(timeout);
       assert.fail(`CLI execution failed: ${error.message}`);
     });
   });
@@ -29,18 +38,27 @@ describe('CLI Integration Tests', () => {
     const cliPath = path.join(process.cwd(), 'bin', 'cli.js');
     const child = spawn('node', [cliPath, '--version']);
     
+    // Add timeout protection
+    const timeout = setTimeout(() => {
+      child.kill('SIGKILL');
+      assert.fail('Test timed out after 10 seconds');
+      done();
+    }, 10000);
+    
     let output = '';
     child.stdout.on('data', (data) => {
       output += data.toString();
     });
     
     child.on('close', (code) => {
+      clearTimeout(timeout);
       assert.strictEqual(code, 0);
       assert(output.includes('1.0.0'));
       done();
     });
     
     child.on('error', (error) => {
+      clearTimeout(timeout);
       assert.fail(`CLI execution failed: ${error.message}`);
     });
   });
