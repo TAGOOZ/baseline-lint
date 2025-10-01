@@ -3,7 +3,7 @@
 > Automated Baseline compatibility checking for modern web development. Know instantly if your CSS and JavaScript features work across all modern browsers.
 
 [![Baseline Compatible](https://img.shields.io/badge/Baseline-Compatible-green.svg)](https://web.dev/baseline)
-[![npm version](https://img.shields.io/badge/npm-v1.0.1-blue.svg)](https://www.npmjs.com/package/baseline-lint)
+[![npm version](https://img.shields.io/badge/npm-v1.0.2-blue.svg)](https://www.npmjs.com/package/baseline-lint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD Pipeline](https://github.com/TAGOOZ/baseline-lint/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/TAGOOZ/baseline-lint/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Supported-blue.svg)](https://www.typescriptlang.org/)
@@ -258,7 +258,13 @@ Add to `package.json`:
 
 ---
 
-## 🆕 Recent Updates (v1.0.1)
+## 🆕 Recent Updates (v1.0.2)
+
+### ✅ Enhanced Baseline Compatibility Detection
+- **🎯 Fixed Unknown Status Warnings**: Resolved "Unknown Baseline status" warnings for widely supported CSS properties and JavaScript APIs
+- **📊 Improved Accuracy**: Added comprehensive fallback mappings for common features like `flex-direction`, `justify-content`, `align-items`, `background-color`, `console`, `Promise`, `Symbol`, etc.
+- **🔍 Better BCD Integration**: Enhanced Browser Compatibility Data integration with intelligent fallback strategies
+- **⚡ Reduced False Warnings**: Significantly reduced false "Unknown Baseline status" warnings while maintaining accuracy
 
 ### ✅ GitHub Actions Fixed!
 - **🔧 Fixed ES Module Execution**: Resolved GitHub Actions failures by using `node bin/cli.js` instead of global installation

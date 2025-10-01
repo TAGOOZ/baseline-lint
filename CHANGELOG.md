@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2025-10-01
+## [1.0.2] - 2025-10-01
+
+### 🎯 Enhanced Baseline Compatibility Detection
+
+#### Fixed
+- ✅ **Resolved Unknown Status Warnings** - Fixed "Unknown Baseline status" warnings for widely supported CSS properties and JavaScript APIs
+- ✅ **Improved BCD Integration** - Enhanced Browser Compatibility Data integration with intelligent fallback strategies
+- ✅ **Better Accuracy** - Added comprehensive fallback mappings for common features like `flex-direction`, `justify-content`, `align-items`, `background-color`, `console`, `Promise`, `Symbol`, etc.
+- ✅ **Reduced False Warnings** - Significantly reduced false "Unknown Baseline status" warnings while maintaining accuracy
+
+#### Added
+- ✅ **CSS Fallback Mappings** - Added fallback data for 15+ common CSS properties
+- ✅ **JavaScript Fallback Mappings** - Added fallback data for 20+ common JavaScript APIs
+- ✅ **Enhanced CSS Parser** - Improved CSS keyword detection and filtering
+- ✅ **Extended JavaScript Coverage** - Added more modern ES features to API detection
+
+---
+
+## [1.0.1] - 2025-10-01
 
 ### 🎉 Initial Release + Enhanced CI/CD & File Detection
 
@@ -49,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📚 **Documentation** - Updated README and docs with new CI features
 - 🔍 **Debugging** - Added extensive debugging output for troubleshooting
 
-#### CLI Commands
+                                #### CLI Commands
 - `baseline-lint check [paths...]` - Check files for Baseline compatibility
 - `baseline-lint score [paths...]` - Calculate compatibility score (0-100)
 - `baseline-lint list <status>` - List features by Baseline status

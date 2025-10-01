@@ -622,9 +622,11 @@ function printTextResults(results, options, score) {
     
     if (!issues || issues.length === 0) return;
     
-    // Filter issues for display (only errors and warnings)
+    // Filter issues for display (show errors, warnings, and info for incompatible features)
     const displayIssues = issues.filter(issue => 
-      issue.severity === 'error' || issue.severity === 'warning'
+      issue.severity === 'error' || 
+      issue.severity === 'warning' || 
+      (issue.severity === 'info' && !issue.compatible)
     );
     
     if (displayIssues.length === 0) return;

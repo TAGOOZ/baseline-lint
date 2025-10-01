@@ -202,7 +202,7 @@ export async function analyzeFile(filePath, options = {}) {
 /**
  * Get package version
  */
-export const version = '1.0.1';
+export const version = '1.0.2';
 
 /**
  * Default configuration

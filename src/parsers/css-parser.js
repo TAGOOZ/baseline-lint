@@ -8,6 +8,34 @@ import { readFileWithCleanup } from '../utils/file-handler.js';
 import { logger, logHelpers } from '../utils/logger.js';
 
 /**
+ * Check if a value is a CSS keyword worth checking for baseline compatibility
+ */
+function isCSSKeyword(value) {
+  // Common CSS keywords that might have baseline compatibility issues
+  const cssKeywords = [
+    'auto', 'none', 'inherit', 'initial', 'unset', 'revert',
+    'block', 'inline', 'flex', 'grid', 'table', 'flow',
+    'row', 'column', 'wrap', 'nowrap', 'wrap-reverse',
+    'start', 'end', 'center', 'stretch', 'baseline',
+    'left', 'right', 'top', 'bottom', 'middle',
+    'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset',
+    'transparent', 'currentColor',
+    'light', 'dark', 'smooth', 'auto-phrase', 'break-word', 'break-all',
+    'blur', 'brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia',
+    'scale', 'rotate', 'translate', 'skew',
+    'ease', 'linear', 'ease-in', 'ease-out', 'ease-in-out',
+    'forwards', 'backwards', 'both', 'infinite', 'alternate', 'reverse',
+    'hidden', 'visible', 'scroll', 'auto',
+    'static', 'relative', 'absolute', 'fixed', 'sticky',
+    'normal', 'bold', 'bolder', 'lighter', 'italic', 'oblique',
+    'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy',
+    'smaller', 'larger', 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'
+  ];
+  
+  return cssKeywords.includes(value.toLowerCase());
+}
+
+/**
  * Parse CSS content and find all Baseline issues
  */
 export function analyzeCSSContent(cssContent, options = {}) {
@@ -28,15 +56,19 @@ export function analyzeCSSContent(cssContent, options = {}) {
         const property = node.property;
         let values = [];
         
-        // Extract values from the declaration
+        // Extract values from the declaration, but only check meaningful ones
         walk(node.value, {
           visit: 'Identifier',
           enter(valueNode) {
-            values.push(valueNode.name);
+            const value = valueNode.name;
+            // Only check values that are likely to be CSS keywords, not generic words
+            if (isCSSKeyword(value)) {
+              values.push(value);
+            }
           }
         });
         
-        // Check each property-value combination
+        // Check each property-value combination for meaningful values
         for (const value of values) {
           const result = checkCSSPropertyValue(property, value);
           const report = generateReport(result, requiredLevel);
