@@ -79,7 +79,7 @@ jobs:
           npm install -g baseline-lint-*.tgz
           baseline-lint --version
           echo "Testing package functionality..."
-          baseline-lint check ./src --score || echo "Package test completed with issues"
+          node bin/cli.js check ./src --score || echo "Package test completed with issues"
 
   # Create GitHub Release
   github-release:

@@ -190,8 +190,8 @@ jobs:
       - name: Test installed package functionality
         run: |
           echo "Testing installed baseline-lint package..."
-          baseline-lint check ./src --score || echo "Package test completed with issues"
-          baseline-lint score ./src || echo "Package scoring completed"
+          node bin/cli.js check ./src --score || echo "Package test completed with issues"
+          node bin/cli.js score ./src || echo "Package scoring completed"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -255,8 +255,8 @@ jobs:
 
       - name: Check baseline-lint against itself
         run: |
-          baseline-lint check ./src || echo "Self-check completed"
-          baseline-lint score ./src || echo "Self-scoring completed"
+          node bin/cli.js check ./src || echo "Self-check completed"
+          node bin/cli.js score ./src || echo "Self-scoring completed"
 
       - name: Check dashboard
         run: |
