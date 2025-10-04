@@ -88,6 +88,18 @@ npm run test:coverage
 
 # Run tests in watch mode
 npm run test:watch
+
+# Performance testing with large codebases
+mkdir -p ~/react-test-large/{js,css,components,fixtures}
+# Download large CSS frameworks (Bootstrap, Tailwind, Bulma)
+cd ~/react-test-large/css
+curl -O https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.css
+curl -O https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.css
+curl -O https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css
+# Run baseline-lint on the large files
+baseline-lint check ~/react-test-large
+# Check performance metrics
+time baseline-lint check ~/react-test-large/css/tailwind.css
 ```
 
 ### Type Checking
