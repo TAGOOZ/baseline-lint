@@ -53,7 +53,7 @@ describe('CLI Integration Tests', () => {
     child.on('close', (code) => {
       clearTimeout(timeout);
       assert.strictEqual(code, 0);
-      assert(output.includes('1.0.6'));
+      assert(output.includes('1.0.7'));
       done();
     });
     

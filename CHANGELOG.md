@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.7] - 2025-10-05
+
+### 🔧 Test Environment Detection & CSS Support Enhancements
+
+#### Fixed
+- ✅ **Test Environment Detection** - Fixed `isTestEnvironment()` function that was incorrectly triggering on filenames containing "test" (e.g., `test.css`)
+  - Changed from: `process.argv.some(arg => arg.includes('test'))`
+  - Changed to: `process.argv.some(arg => arg.includes('node_modules/.bin/jest') || arg.includes('node_modules/jest'))`
+- ✅ **CSS Property Detection** - `word-break: auto-phrase` now correctly shows "Limited availability - Not yet Baseline" instead of "Unknown Baseline status"
+- ✅ **False Positives Eliminated** - Common CSS properties no longer trigger warnings
+
+#### Added
+- ✨ **80+ CSS Fallback Entries** - Comprehensive fallback data for common CSS properties including:
+  - Layout: `background`, `padding`, `margin`, `border-radius`, `display`, `position`, `float`
+  - Typography: `font-size`, `font-family`, `font-weight`, `text-align`, `line-height`, `letter-spacing`
+  - Visual: `color`, `opacity`, `box-shadow`, `text-decoration`, `cursor`
+  - Modern: `container-type`, `word-break.auto-phrase`
+- ✨ **COMMON_CSS_PROPERTIES Set** - 25 widely-supported properties that bypass unnecessary checking
+- ✨ **Dynamic Fallback Generation** - Automatic "widely available" status for common properties
+
+#### Changed
+- 🔄 **Simplified Keyword Checking** - `isCSSKeyword()` now only checks truly problematic values (flex, grid, auto-phrase, sticky)
+- 🔄 **Clean Output** - Removed all DEBUG logging statements for production-ready experience
+
+#### Benefits
+- ✅ Zero false positives for standard CSS properties
+- ✅ Accurate compatibility reporting for modern CSS features
+- ✅ CLI works correctly with files containing "test" in their names
+- ✅ Improved user experience with cleaner output
+
+---
+
 ## [1.0.6] - 2025-10-01
 
 ### 🔧 CI/CD Workflow Fixes

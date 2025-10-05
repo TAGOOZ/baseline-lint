@@ -3,7 +3,7 @@
 > Automated Baseline compatibility checking for modern web development. Know instantly if your CSS and JavaScript features work across all modern browsers.
 
 [![Baseline Compatible](https://img.shields.io/badge/Baseline-Compatible-green.svg)](https://web.dev/baseline)
-[![npm version](https://img.shields.io/badge/npm-v1.0.6-blue.svg)](https://www.npmjs.com/package/baseline-lint)
+[![npm version](https://img.shields.io/badge/npm-v1.0.7-blue.svg)](https://www.npmjs.com/package/baseline-lint)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI/CD Pipeline](https://github.com/TAGOOZ/baseline-lint/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/TAGOOZ/baseline-lint/actions)
 [![Tests Passing](https://img.shields.io/badge/Tests-✅_Passing-green.svg)](https://github.com/TAGOOZ/baseline-lint/actions)
@@ -270,13 +270,22 @@ Add to `package.json`:
 
 ---
 
-## 🆕 Recent Updates (v1.0.6) - **All Issues Resolved!** 🎉
+## 🆕 Recent Updates (v1.0.7) - **Enhanced Compatibility Checking!** 🎉
+
+### ✅ **MAJOR FIX: Test Environment Detection & CSS Support**
+- **🔍 Fixed Test Detection**: Corrected `isTestEnvironment()` to no longer trigger on filenames containing "test"
+- **📊 Accurate Results**: `word-break: auto-phrase` now correctly shows "Limited availability - Not yet Baseline"
+- **✨ 80+ CSS Fallbacks**: Added comprehensive fallback data for common CSS properties
+- **🎯 Zero False Positives**: Common properties (background, padding, border-radius, etc.) no longer show warnings
+- **🧹 Clean Output**: Removed all debug logging for production-ready experience
+
+### Previous Updates (v1.0.6) - **All Issues Resolved!** 🎉
 
 ### ✅ **MAJOR FIX: CI/CD Completely Stable** 
 - **🚀 No More Hanging**: Fixed all infinite hanging issues in GitHub Actions and local tests
 - **⏱️ Smart Timeouts**: Added comprehensive timeout protection (2-4 minutes per job)
 - **🧹 Process Cleanup**: Implemented `cleanupAndExit()` in all CLI commands (check, score, performance)
-- **� Test Reliability**: Fixed hanging integration tests with 10-second timeout protection
+- **🔧 Test Reliability**: Fixed hanging integration tests with 10-second timeout protection
 - **✅ 100% Success Rate**: CI/CD workflows now pass consistently across all platforms
 
 ### ✅ **Enhanced Cross-Platform Compatibility**
@@ -412,6 +421,7 @@ Contributions welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and feature updates.
 
 ### Recent Highlights
+- **v1.0.7**: **Enhanced CSS Support** - Fixed test environment detection and added 80+ CSS fallbacks! 🎉
 - **v1.0.6**: **ALL MAJOR ISSUES RESOLVED** - Complete CI/CD stability achieved! 🎉
 - **v1.0.5**: Enhanced cross-platform compatibility (Node 18/20/22 support)
 - **v1.0.4**: Fixed GitHub Actions hanging issues with timeout protection
@@ -432,7 +442,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed version history and feature update
 
 ## 🏆 Project Status: **PRODUCTION READY** ✅
 
-**baseline-lint v1.0.6** represents a **major milestone** with all critical issues resolved:
+**baseline-lint v1.0.7** represents a **major milestone** with all critical issues resolved:
 
 ### ✅ **Completely Stable**
 - **Zero hanging workflows** in GitHub Actions

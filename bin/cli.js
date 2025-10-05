@@ -61,7 +61,7 @@ const program = new Command();
 program
   .name('baseline-lint')
   .description('Check web features for Baseline compatibility')
-  .version('1.0.6');
+  .version('1.0.7');
 
 /**
  * Main check command
