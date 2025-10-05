@@ -27,6 +27,7 @@
 ### The Solution ✨
 - ✅ Instant compatibility checks for CSS & JavaScript
 - 📊 Real-time Baseline scoring (0-100)
+- 🌐 **[Web App](https://base-lint.netlify.app/)** - Try it online with retro terminal UI!
 - 🤖 **Fixed GitHub Actions** - No more hanging workflows!
 - 📈 Beautiful Next.js dashboard with interactive scanning
 - 🔒 Enhanced security with input validation
@@ -87,9 +88,44 @@ baseline-lint list newly --group css # List features
 baseline-lint config --init        # Setup configuration
 ```
 
-### 2️⃣ Next.js Dashboard (New!)
+---
 
-Beautiful web interface for interactive baseline scanning:
+## 🌐 Web App - Try It Online!
+
+**[Launch Baseline Lint Terminal →](https://base-lint.netlify.app/)**
+
+Experience baseline-lint directly in your browser with our retro terminal-style web interface!
+
+![Baseline Lint Terminal](https://github.com/user-attachments/assets/your-terminal-screenshot-1.png)
+
+### ✨ Features
+
+- 🖥️ **Retro Terminal UI** - Classic green-on-black terminal aesthetics
+- ⚡ **Real-time Analysis** - Instant CSS/JS compatibility checking
+- 🔍 **GitHub Repo Scanner** - Analyze entire repositories (max 50 files, 100KB per file)
+- 📝 **Monaco Editor** - Professional code editor with syntax highlighting
+- 🔐 **JWT Authentication** - Secure user sessions
+- 🛡️ **Security Middleware** - Rate limiting, CORS protection, input validation
+- 📊 **Code Examples** - Pre-loaded examples from popular libraries (React, Vue, Lodash)
+
+![Code Examples](https://github.com/user-attachments/assets/your-examples-screenshot-2.png)
+
+![GitHub Repository Analysis](https://github.com/user-attachments/assets/your-repo-scanner-screenshot-3.png)
+
+### 🏗️ Architecture
+
+- **Frontend**: React + TypeScript + Monaco Editor (Deployed on Netlify)
+- **Backend**: Express.js + TypeScript + baseline-lint core (Deployed on Render)
+- **Security**: JWT auth, rate limiting, helmet middleware, input sanitization
+- **Real-time**: WebSocket-like updates for long-running scans
+
+**Perfect for**: Quick compatibility checks, learning about browser support, analyzing open-source projects!
+
+---
+
+### 🖥️ Local Development Dashboard
+
+For local use, we also provide a Next.js dashboard:
 
 ```bash
 cd baseline-dashboard
@@ -103,7 +139,9 @@ Visit `http://localhost:3000` to:
 - 🎨 **Modern UI**: Clean, responsive interface with dark/light mode
 - 📈 **Visual Analytics**: Charts and graphs of compatibility metrics
 
-### 3️⃣ GitHub Action (Fixed & Working!)
+---
+
+### 🤖 GitHub Action (Fixed & Working!)
 
 Create `.github/workflows/pr-check.yml`:
 
@@ -271,6 +309,14 @@ Add to `package.json`:
 ---
 
 ## 🆕 Recent Updates (v1.0.7) - **Enhanced Compatibility Checking!** 🎉
+
+### 🌐 **NEW: Web Application Launch!**
+- **🚀 [base-lint.netlify.app](https://base-lint.netlify.app/)** - Try baseline-lint in your browser!
+- **🖥️ Retro Terminal UI** - Classic green-on-black terminal aesthetics
+- **🔍 GitHub Repo Scanner** - Analyze entire repositories in real-time
+- **📝 Monaco Editor** - Professional code editor with syntax highlighting
+- **🔐 JWT Auth & Security** - Rate limiting, CORS protection, secure sessions
+- **📊 Pre-loaded Examples** - React Hooks, Vue reactivity, Lodash methods, modern CSS
 
 ### ✅ **MAJOR FIX: Test Environment Detection & CSS Support**
 - **🔍 Fixed Test Detection**: Corrected `isTestEnvironment()` to no longer trigger on filenames containing "test"
