@@ -219,6 +219,279 @@ const CSS_FALLBACKS = {
       safari_ios: '14'
     }
   },
+  'css.properties.background': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.font-size': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.font-family': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.font-weight': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.text-align': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.position': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.z-index': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.opacity': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.overflow': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.cursor': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.box-shadow': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '10',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '4',
+      firefox_android: '4',
+      safari: '5.1',
+      safari_ios: '5'
+    }
+  },
+  'css.properties.box-sizing': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '10',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '29',
+      firefox_android: '29',
+      safari: '5.1',
+      safari_ios: '5'
+    }
+  },
+  'css.properties.text-decoration': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.line-height': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.float': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.min-height': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.max-width': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.min-width': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.max-height': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.letter-spacing': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
+  'css.properties.vertical-align': { 
+    baseline: 'high', 
+    baseline_high_date: '2012-01-01',
+    support: {
+      chrome: '1',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '1',
+      firefox_android: '4',
+      safari: '1',
+      safari_ios: '1'
+    }
+  },
   'css.properties.backdrop-filter': { 
     baseline: 'low', 
     baseline_low_date: '2024-09-16',
@@ -243,6 +516,58 @@ const CSS_FALLBACKS = {
       firefox_android: '89',
       safari: '15',
       safari_ios: '15'
+    }
+  },
+  'css.properties.word-break': { 
+    baseline: 'high', 
+    baseline_high_date: '2013-07-02',
+    support: {
+      chrome: '18',
+      chrome_android: '18',
+      edge: '12',
+      firefox: '15',
+      firefox_android: '15',
+      safari: '6.1',
+      safari_ios: '7'
+    }
+  },
+  'css.properties.word-break.auto-phrase': { 
+    baseline: false,
+    baseline_high_date: null,
+    support: {
+      chrome: '119',
+      chrome_android: '119',
+      edge: '119',
+      firefox: null,
+      firefox_android: null,
+      safari: null,
+      safari_ios: null
+    }
+  },
+  'css.properties.container-type': { 
+    baseline: 'low', 
+    baseline_low_date: '2023-02-14',
+    support: {
+      chrome: '105',
+      chrome_android: '105',
+      edge: '105',
+      firefox: '110',
+      firefox_android: '110',
+      safari: '16',
+      safari_ios: '16'
+    }
+  },
+  'css.properties.container-type.inline-size': { 
+    baseline: 'low', 
+    baseline_low_date: '2023-02-14',
+    support: {
+      chrome: '105',
+      chrome_android: '105',
+      edge: '105',
+      firefox: '110',
+      firefox_android: '110',
+      safari: '16',
+      safari_ios: '16'
     }
   },
   'css.properties.--primary-color': { 
@@ -649,6 +974,42 @@ export function getBCDKeyStatus(bcdKey) {
     logger.debug(`Using fallback data for: ${bcdKey}`, { baseline: fallback?.baseline });
     bcdCache.set(bcdKey, fallback);
     return fallback;
+  }
+  
+  // Handle common CSS properties that might not be explicitly defined
+  if (bcdKey.startsWith('css.properties.')) {
+    // Extract just the property name
+    const property = bcdKey.replace('css.properties.', '');
+    
+    // List of common CSS properties that are widely supported
+    const commonCssProperties = [
+      'background', 'border-radius', 'padding', 'margin',
+      'font', 'color', 'display', 'position', 'text-align',
+      'width', 'height', 'overflow', 'border', 'float',
+      'line-height', 'z-index', 'text-decoration', 'background-color',
+      'font-size', 'font-weight', 'opacity', 'cursor', 'box-sizing',
+      'box-shadow', 'transition', 'transform', 'vertical-align', 'letter-spacing'
+    ];
+    
+    if (commonCssProperties.includes(property)) {
+      const commonFallback = {
+        baseline: 'high',
+        baseline_high_date: '2012-01-01',
+        support: {
+          chrome: '1',
+          chrome_android: '18',
+          edge: '12',
+          firefox: '1',
+          firefox_android: '4',
+          safari: '1',
+          safari_ios: '1'
+        }
+      };
+      
+      logger.debug(`Using common property fallback for: ${bcdKey}`, { baseline: commonFallback.baseline });
+      bcdCache.set(bcdKey, commonFallback);
+      return commonFallback;
+    }
   }
 
   // Return null for truly unknown features

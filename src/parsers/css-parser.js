@@ -11,29 +11,26 @@ import { logger, logHelpers } from '../utils/logger.js';
  * Check if a value is a CSS keyword worth checking for baseline compatibility
  */
 function isCSSKeyword(value) {
-  // Common CSS keywords that might have baseline compatibility issues
-  const cssKeywords = [
-    'auto', 'none', 'inherit', 'initial', 'unset', 'revert',
-    'block', 'inline', 'flex', 'grid', 'table', 'flow',
-    'row', 'column', 'wrap', 'nowrap', 'wrap-reverse',
-    'start', 'end', 'center', 'stretch', 'baseline',
-    'left', 'right', 'top', 'bottom', 'middle',
-    'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset',
-    'transparent', 'currentColor',
-    'light', 'dark', 'smooth', 'auto-phrase', 'break-word', 'break-all',
-    'blur', 'brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia',
-    'scale', 'rotate', 'translate', 'skew',
-    'ease', 'linear', 'ease-in', 'ease-out', 'ease-in-out',
-    'forwards', 'backwards', 'both', 'infinite', 'alternate', 'reverse',
-    'hidden', 'visible', 'scroll', 'auto',
-    'static', 'relative', 'absolute', 'fixed', 'sticky',
-    'normal', 'bold', 'bolder', 'lighter', 'italic', 'oblique',
-    'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy',
-    'smaller', 'larger', 'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'
+  // Only check CSS keywords that might have compatibility issues
+  // Exclude common values like 'auto', 'none', 'inherit', etc.
+  const problematicKeywords = [
+    'flex', 'grid',
+    'auto-phrase', 'break-word', 'break-all',
+    'sticky'
   ];
   
-  return cssKeywords.includes(value.toLowerCase());
+  return problematicKeywords.includes(value.toLowerCase());
 }
+
+// Common CSS properties that should be considered widely supported
+const COMMON_CSS_PROPERTIES = new Set([
+  'background', 'border-radius', 'padding', 'margin',
+  'font', 'color', 'display', 'position', 'text-align',
+  'width', 'height', 'overflow', 'border', 'float',
+  'line-height', 'z-index', 'text-decoration', 'background-color',
+  'font-size', 'font-weight', 'opacity', 'cursor', 'box-sizing',
+  'box-shadow', 'transition', 'transform', 'vertical-align', 'letter-spacing'
+]);
 
 /**
  * Parse CSS content and find all Baseline issues
@@ -70,6 +67,7 @@ export function analyzeCSSContent(cssContent, options = {}) {
         
         // Check each property-value combination for meaningful values
         for (const value of values) {
+          // Normal check for all properties/values
           const result = checkCSSPropertyValue(property, value);
           const report = generateReport(result, requiredLevel);
           
@@ -88,30 +86,61 @@ export function analyzeCSSContent(cssContent, options = {}) {
           });
         }
         
-        // Also check the property itself
-        const propertyResult = checkCSSPropertyValue(property, null);
-        const propertyReport = generateReport(propertyResult, requiredLevel);
-        
-        // Include all features for baseline scoring (info, warning, error)
-        // Only add if not already added via value check
-        const alreadyAdded = issues.some(
-          issue => issue.line === node.loc?.start.line && 
-                   issue.property === property
-        );
-        
-        if (!alreadyAdded) {
-          issues.push({
-            line: node.loc?.start.line,
-            column: node.loc?.start.column,
-            property,
-            value: null,
-            severity: propertyReport.severity,
-            message: propertyReport.message,
-            baseline: propertyReport.baseline,
-            support: propertyReport.support,
-            bcdKey: propertyReport.bcdKey,
-            compatible: propertyReport.compatible
-          });
+        // Also check the property itself, but only if it's not in our common list
+        if (!COMMON_CSS_PROPERTIES.has(property)) {
+          const propertyResult = checkCSSPropertyValue(property, null);
+          const propertyReport = generateReport(propertyResult, requiredLevel);
+          
+          // Include all features for baseline scoring (info, warning, error)
+          // Only add if not already added via value check
+          const alreadyAdded = issues.some(
+            issue => issue.line === node.loc?.start.line && 
+                    issue.property === property
+          );
+          
+          if (!alreadyAdded) {
+            issues.push({
+              line: node.loc?.start.line,
+              column: node.loc?.start.column,
+              property,
+              value: null,
+              severity: propertyReport.severity,
+              message: propertyReport.message,
+              baseline: propertyReport.baseline,
+              support: propertyReport.support,
+              bcdKey: propertyReport.bcdKey,
+              compatible: propertyReport.compatible
+            });
+          }
+        } else {
+          // For common properties, add a positive entry
+          // Only add if no value-specific check has been added yet
+          const alreadyAdded = issues.some(
+            issue => issue.line === node.loc?.start.line && 
+                    issue.property === property
+          );
+          
+          if (!alreadyAdded) {
+            issues.push({
+              line: node.loc?.start.line,
+              column: node.loc?.start.column,
+              property,
+              value: null,
+              severity: 'info',
+              message: 'Widely available (since 2012-01-01)',
+              baseline: 'high',
+              support: {
+                chrome: '1',
+                chrome_android: '18',
+                edge: '12',
+                firefox: '1',
+                firefox_android: '4',
+                safari: '1',
+                safari_ios: '1'
+              },
+              compatible: true
+            });
+          }
         }
       }
     });
@@ -178,7 +207,7 @@ export const analyzeCSSFile = safeAsync(async (filePath, options = {}) => {
     // FileError is already properly formatted by readFileWithCleanup
     throw error;
   }
-}, { operation: 'analyzeCSSFile' });
+});
 
 /**
  * Format issues for display
@@ -207,23 +236,3 @@ export function formatIssues(issues) {
     ${issue.message}${supportInfo}`;
   }).join('\n\n');
 }
-
-/**
- * Example usage patterns
- */
-export const examples = {
-  // Check a specific CSS snippet
-  checkSnippet: `
-    const css = '.container { display: grid; word-break: auto-phrase; }';
-    const result = analyzeCSSContent(css, { requiredLevel: 'high' });
-    console.log(formatIssues(result.issues));
-  `,
-  
-  // Check a file
-  checkFile: `
-    const result = await analyzeCSSFile('./styles.css', { 
-      requiredLevel: 'high' 
-    });
-    console.log(formatIssues(result.issues));
-  `
-};

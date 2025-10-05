@@ -7,7 +7,7 @@
 export function isTestEnvironment() {
   return process.env.NODE_ENV === 'test' || 
          process.env.NODE_TEST_CONTEXT !== undefined ||
-         process.argv.some(arg => arg.includes('test'));
+         process.argv.some(arg => arg.includes('node_modules/.bin/jest') || arg.includes('node_modules/jest'));
 }
 
 /**
