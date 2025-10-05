@@ -96,7 +96,7 @@ baseline-lint config --init        # Setup configuration
 
 Experience baseline-lint directly in your browser with our retro terminal-style web interface!
 
-![Baseline Lint Terminal](https://github.com/user-attachments/assets/your-terminal-screenshot-1.png)
+![Baseline Lint Terminal](./assets/terminal-home.png)
 
 ### ✨ Features
 
@@ -108,9 +108,9 @@ Experience baseline-lint directly in your browser with our retro terminal-style 
 - 🛡️ **Security Middleware** - Rate limiting, CORS protection, input validation
 - 📊 **Code Examples** - Pre-loaded examples from popular libraries (React, Vue, Lodash)
 
-![Code Examples](https://github.com/user-attachments/assets/your-examples-screenshot-2.png)
+![Code Examples](./assets/code-examples.png)
 
-![GitHub Repository Analysis](https://github.com/user-attachments/assets/your-repo-scanner-screenshot-3.png)
+![GitHub Repository Analysis](./assets/repo-scanner.png)
 
 ### 🏗️ Architecture
 
@@ -254,6 +254,19 @@ jobs:
 - ⚡ **Fast Execution**: 3-minute timeout with efficient file processing
 - 🚀 **No Hanging**: Fixed workflow hanging issue with proper exit handling
 
+### 📸 Example PR Comment
+
+Here's what the automated PR comment looks like:
+
+![PR Comment Example](./assets/pr-comment-example.png)
+
+The GitHub Action automatically:
+- ✅ Detects changed CSS/JS files in your PR
+- 📊 Calculates baseline compatibility score (0-100)
+- 💬 Posts detailed report as a PR comment
+- 🎯 Provides actionable recommendations
+
+---
 
 ## 🎨 Example Output
 
